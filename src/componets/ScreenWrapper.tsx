@@ -1,4 +1,4 @@
-import { View } from "react-native-reanimated/lib/typescript/Animated";
+import { View } from "react-native";
 import { styles } from "./ScreenWrapper.style";
 
 export default function ScreenWrapper({
