@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { Image, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
 import TabBar from "../../componets/common/TabBar";
@@ -9,6 +9,7 @@ import CategoryButton from "../../componets/ui/CategoryButton";
 import StatCard from "../../componets/ui/StatCard";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserProfile } from "../../hooks/useUserProfile";
+import CustumSafeAreaView from "../../layout/CustumSafeAreaView";
 import { createStyles } from "./UserProfile.style";
 
 export default function UserProfile() {
@@ -17,7 +18,7 @@ export default function UserProfile() {
   const styles = createStyles(theme);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <CustumSafeAreaView>
       <View style={styles.container}>
         <ScrollView
           style={styles.scroll}
@@ -215,6 +216,6 @@ export default function UserProfile() {
 
         <TabBar />
       </View>
-    </SafeAreaView>
+    </CustumSafeAreaView>
   );
 }
