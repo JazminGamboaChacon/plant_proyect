@@ -11,7 +11,7 @@ export default function Divider() {
   return (
     <View style={styles.dividerRow}>
       <View style={styles.dividerLine} />
-      <Ionicons name="leaf-outline" size={14} color={theme.colors.border} />
+      <Ionicons name="leaf-outline" size={theme.iconSize.sm} color={theme.colors.border} />
       <View style={styles.dividerLine} />
     </View>
   );

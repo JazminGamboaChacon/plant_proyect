@@ -1,8 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
 export type Category = {
-  iconName: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
+  imageUrl: string;
   name: string;
   count: number;
 };

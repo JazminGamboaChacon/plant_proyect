@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { AppTheme } from "../../theme/light";
+import { AppTheme } from "../../theme/tokens/types";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
@@ -7,16 +7,21 @@ export const createStyles = (theme: AppTheme) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: 20,
-      paddingTop: 16,
-      paddingBottom: 8,
+      paddingHorizontal: theme.spacing.lg,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.sm,
     },
     placeholder: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: theme.iconSize.md,
+      height: theme.iconSize.md,
+      borderRadius: theme.radius.full,
       backgroundColor: theme.colors.border,
     },
-    icons: { flexDirection: "row", gap: 8 },
-    iconBtn: { padding: 4 },
+    icons: {
+      flexDirection: "row",
+      gap: theme.spacing.sm,
+    },
+    iconBtn: {
+      padding: theme.spacing.xs,
+    },
   });

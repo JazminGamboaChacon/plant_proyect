@@ -19,8 +19,8 @@ export default function AchievementBadge({
     >
       <Ionicons
         name={iconName}
-        size={13}
-        color={earned ? theme.colors.green : theme.colors.textMid}
+        size={theme.iconSize.xs}
+        color={earned ? theme.colors.primary : theme.colors.textSecondary}
       />
       <Text style={[styles.badgeLabel, !earned && styles.badgeLabelLocked]}>
         {label}
