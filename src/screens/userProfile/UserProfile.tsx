@@ -61,7 +61,7 @@ export default function UserProfile() {
               icon={
                 <MaterialCommunityIcons
                   name="fire"
-                  size={theme.iconSize.lg}
+                  size={theme.iconSize.md}
                   color={theme.colors.textPrimary}
                 />
               }
@@ -73,7 +73,7 @@ export default function UserProfile() {
               icon={
                 <Ionicons
                   name="people-outline"
-                  size={theme.iconSize.lg}
+                  size={theme.iconSize.md}
                   color={theme.colors.textPrimary}
                 />
               }
@@ -85,7 +85,7 @@ export default function UserProfile() {
               icon={
                 <MaterialCommunityIcons
                   name="sprout"
-                  size={theme.iconSize.lg}
+                  size={theme.iconSize.md}
                   color={theme.colors.textPrimary}
                 />
               }
@@ -191,24 +191,6 @@ export default function UserProfile() {
             <Text style={styles.completionHint}>
               Add more info to complete your profile!
             </Text>
-          </View>
-
-          {/* Planta del día */}
-          <View style={styles.potdCard}>
-            <View style={styles.potdIconBg}>
-              <MaterialCommunityIcons
-                name="flower-tulip-outline"
-                size={theme.iconSize.xl}
-                color={theme.colors.primary}
-              />
-            </View>
-            <View style={styles.potdInfo}>
-              <Text style={styles.potdLabel}>PLANT OF THE DAY</Text>
-              <Text style={styles.potdName}>{user.plantOfTheDay.name}</Text>
-              <Text style={styles.potdDesc}>
-                {user.plantOfTheDay.description}
-              </Text>
-            </View>
           </View>
 
           <View style={{ height: theme.spacing.md }} />

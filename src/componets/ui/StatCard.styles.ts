@@ -13,8 +13,8 @@ export const createStyles = (theme: AppTheme) =>
       paddingVertical: theme.spacing.md,
     },
     statIconBg: {
-      width: theme.iconSize.md,
-      height: theme.iconSize.md,
+      width: theme.spacing.xl,
+      height: theme.spacing.xl,
       borderRadius: theme.radius.full,
       alignItems: "center",
       justifyContent: "center",

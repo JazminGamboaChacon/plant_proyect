@@ -194,42 +194,4 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: theme.typography.sizes.xs,
       color: theme.colors.textSecondary,
     },
-
-    potdCard: {
-      marginHorizontal: theme.spacing.lg,
-      backgroundColor: theme.colors.primaryLight,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.lg,
-      padding: theme.spacing.md,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.md,
-    },
-    potdIconBg: {
-      width: theme.iconSize.lg,
-      height: theme.iconSize.lg,
-      borderRadius: theme.radius.full,
-      backgroundColor: theme.colors.primaryPale,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    potdInfo: { flex: 1 },
-    potdLabel: {
-      fontSize: theme.typography.sizes.xs,
-      fontFamily: theme.typography.families.medium,
-      color: theme.colors.primary,
-      letterSpacing: 0.6,
-      marginBottom: 2,
-    },
-    potdName: {
-      fontSize: theme.typography.sizes.sm,
-      fontFamily: theme.typography.families.bold,
-      color: theme.colors.textPrimary,
-      marginBottom: 2,
-    },
-    potdDesc: {
-      fontSize: theme.typography.sizes.xs,
-      color: theme.colors.textSecondary,
-    },
   });
