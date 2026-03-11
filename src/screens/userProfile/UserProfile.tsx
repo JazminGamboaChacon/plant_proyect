@@ -43,20 +43,17 @@ export default function UserProfile() {
               </View>
               <Text style={styles.bioText}>{user.bio}</Text>
             </View>
+            <View style={styles.birthdayRow}>
+              <Ionicons
+                name="gift-outline"
+                size={theme.iconSize.sm}
+                color={theme.colors.textSecondary}
+              />
+              <Text style={styles.birthdayText}>{user.birthday}</Text>
+            </View>
           </View>
 
           <Divider />
-
-          {/* Cumpleaños */}
-          <View style={styles.infoRow}>
-            <Ionicons
-              name="gift-outline"
-              size={theme.iconSize.md}
-              color={theme.colors.textSecondary}
-            />
-            <Text style={styles.infoLabel}>Birthday</Text>
-            <Text style={styles.infoValue}>{user.birthday}</Text>
-          </View>
 
           {/* Stats */}
           <View style={styles.statsRow}>
