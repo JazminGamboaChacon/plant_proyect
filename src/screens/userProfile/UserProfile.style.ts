@@ -64,28 +64,15 @@ export const createStyles = (theme: AppTheme) =>
       lineHeight: 22,
     },
 
-    infoRow: {
+    birthdayRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginHorizontal: theme.spacing.lg,
-      backgroundColor: theme.colors.surface,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.xl,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      marginBottom: theme.spacing.md,
+      gap: theme.spacing.xs,
+      marginTop: theme.spacing.sm,
     },
-    infoLabel: {
-      flex: 1,
+    birthdayText: {
       fontSize: theme.typography.sizes.sm,
       color: theme.colors.textSecondary,
-      marginLeft: theme.spacing.sm,
-    },
-    infoValue: {
-      fontSize: theme.typography.sizes.sm,
-      fontFamily: theme.typography.families.medium,
-      color: theme.colors.textPrimary,
     },
 
     statsRow: {
@@ -148,7 +135,10 @@ export const createStyles = (theme: AppTheme) =>
       letterSpacing: 0.7,
     },
     categoriesScroll: { marginBottom: 4 },
-    categoriesContent: { paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm },
+    categoriesContent: {
+      paddingHorizontal: theme.spacing.lg,
+      gap: theme.spacing.sm,
+    },
 
     badgesRow: {
       flexDirection: "row",
