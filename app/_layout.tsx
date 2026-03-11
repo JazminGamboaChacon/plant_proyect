@@ -1,10 +1,28 @@
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_700Bold,
+  useFonts,
+} from "@expo-google-fonts/inter";
+import { Lora_400Regular_Italic } from "@expo-google-fonts/lora";
 import { Stack } from "expo-router";
 import { ThemeProvider } from "../src/context/ThemeContext";
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_700Bold,
+    Lora_400Regular_Italic,
+  });
+
+  if (!fontsLoaded) return null;
+
   return (
     <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </ThemeProvider>
   );
 }

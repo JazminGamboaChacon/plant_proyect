@@ -1,15 +1,14 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
-import TabBar from "../../componets/common/TabBar";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
 import CategoryButton from "../../componets/ui/CategoryButton";
 import StatCard from "../../componets/ui/StatCard";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserProfile } from "../../hooks/useUserProfile";
-import CustumSafeAreaView from "../../layout/CustumSafeAreaView";
 import { createStyles } from "./UserProfile.style";
 
 export default function UserProfile() {
@@ -18,7 +17,7 @@ export default function UserProfile() {
   const styles = createStyles(theme);
 
   return (
-    <CustumSafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <ScrollView
           style={styles.scroll}
@@ -36,7 +35,11 @@ export default function UserProfile() {
             <Text style={styles.profileHandle}>{user.handle}</Text>
             <View style={styles.bioCard}>
               <View style={styles.bioIconBg}>
-                <Ionicons name="leaf" size={16} color={theme.colors.green} />
+                <Ionicons
+                  name="leaf"
+                  size={theme.iconSize.md}
+                  color={theme.colors.primary}
+                />
               </View>
               <Text style={styles.bioText}>{user.bio}</Text>
             </View>
@@ -48,8 +51,8 @@ export default function UserProfile() {
           <View style={styles.infoRow}>
             <Ionicons
               name="gift-outline"
-              size={16}
-              color={theme.colors.textMid}
+              size={theme.iconSize.md}
+              color={theme.colors.textSecondary}
             />
             <Text style={styles.infoLabel}>Birthday</Text>
             <Text style={styles.infoValue}>{user.birthday}</Text>
@@ -61,8 +64,8 @@ export default function UserProfile() {
               icon={
                 <MaterialCommunityIcons
                   name="fire"
-                  size={20}
-                  color={theme.colors.textDark}
+                  size={theme.iconSize.lg}
+                  color={theme.colors.textPrimary}
                 />
               }
               value={String(user.streak)}
@@ -73,20 +76,20 @@ export default function UserProfile() {
               icon={
                 <Ionicons
                   name="people-outline"
-                  size={20}
-                  color={theme.colors.textDark}
+                  size={theme.iconSize.lg}
+                  color={theme.colors.textPrimary}
                 />
               }
               value={String(user.friends)}
               label="Friends"
-              iconBg={theme.colors.greenLight}
+              iconBg={theme.colors.primaryLight}
             />
             <StatCard
               icon={
                 <MaterialCommunityIcons
                   name="sprout"
-                  size={20}
-                  color={theme.colors.textDark}
+                  size={theme.iconSize.lg}
+                  color={theme.colors.textPrimary}
                 />
               }
               value={String(user.plants)}
@@ -121,8 +124,8 @@ export default function UserProfile() {
           <View style={styles.sectionHeader}>
             <MaterialCommunityIcons
               name="shape-outline"
-              size={14}
-              color={theme.colors.textMid}
+              size={theme.iconSize.sm}
+              color={theme.colors.textSecondary}
             />
             <Text style={styles.sectionTitle}>PLANT CATEGORIES</Text>
           </View>
@@ -143,8 +146,8 @@ export default function UserProfile() {
           <View style={styles.sectionHeader}>
             <MaterialCommunityIcons
               name="trophy-outline"
-              size={14}
-              color={theme.colors.textMid}
+              size={theme.iconSize.sm}
+              color={theme.colors.textSecondary}
             />
             <Text style={styles.sectionTitle}>ACHIEVEMENTS</Text>
           </View>
@@ -171,8 +174,8 @@ export default function UserProfile() {
               <View style={styles.completionTitleRow}>
                 <Ionicons
                   name="person-circle-outline"
-                  size={16}
-                  color={theme.colors.textMid}
+                  size={theme.iconSize.md}
+                  color={theme.colors.textSecondary}
                 />
                 <Text style={styles.completionTitle}>Profile Completion</Text>
               </View>
@@ -198,8 +201,8 @@ export default function UserProfile() {
             <View style={styles.potdIconBg}>
               <MaterialCommunityIcons
                 name="flower-tulip-outline"
-                size={22}
-                color={theme.colors.green}
+                size={theme.iconSize.xl}
+                color={theme.colors.primary}
               />
             </View>
             <View style={styles.potdInfo}>
@@ -211,11 +214,9 @@ export default function UserProfile() {
             </View>
           </View>
 
-          <View style={{ height: 16 }} />
+          <View style={{ height: theme.spacing.md }} />
         </ScrollView>
-
-        <TabBar />
       </View>
-    </CustumSafeAreaView>
+    </SafeAreaView>
   );
 }
