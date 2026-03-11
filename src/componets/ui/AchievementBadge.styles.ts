@@ -1,30 +1,32 @@
 import { StyleSheet } from "react-native";
-import { AppTheme } from "../../theme/light";
+import { AppTheme } from "../../theme/tokens/types";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
     badge: {
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 999,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      gap: 6,
+      borderRadius: theme.radius.full,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.xs,
+      gap: theme.spacing.xs,
       borderWidth: 1,
     },
     badgeEarned: {
-      backgroundColor: theme.colors.greenLight,
-      borderColor: "rgba(57,121,73,0.3)",
+      backgroundColor: theme.colors.primaryLight,
+      borderColor: theme.colors.primaryLight,
     },
     badgeLocked: {
-      backgroundColor: theme.colors.greenSoft,
+      backgroundColor: theme.colors.primarySoft,
       borderColor: theme.colors.border,
       opacity: 0.5,
     },
     badgeLabel: {
-      fontSize: 12,
-      fontWeight: "500",
-      color: theme.colors.textDark,
+      fontSize: theme.typography.sizes.xs,
+      fontFamily: theme.typography.families.medium,
+      color: theme.colors.textPrimary,
     },
-    badgeLabelLocked: { color: theme.colors.textMid },
+    badgeLabelLocked: {
+      color: theme.colors.textSecondary,
+    },
   });

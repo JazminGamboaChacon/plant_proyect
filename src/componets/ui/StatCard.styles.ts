@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { AppTheme } from "../../theme/light";
+import { AppTheme } from "../../theme/tokens/types";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
@@ -8,23 +8,26 @@ export const createStyles = (theme: AppTheme) =>
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
       borderColor: theme.colors.border,
-      borderRadius: 16,
+      borderRadius: theme.radius.lg,
       alignItems: "center",
-      paddingVertical: 14,
+      paddingVertical: theme.spacing.md,
     },
     statIconBg: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: theme.spacing.xl,
+      height: theme.spacing.xl,
+      borderRadius: theme.radius.full,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 8,
+      marginBottom: theme.spacing.sm,
     },
     statValue: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme.colors.textDark,
+      fontSize: theme.typography.sizes.lg,
+      fontFamily: theme.typography.families.bold,
+      color: theme.colors.textPrimary,
       marginBottom: 2,
     },
-    statLabel: { fontSize: 12, color: theme.colors.textMid },
+    statLabel: {
+      fontSize: theme.typography.sizes.xs,
+      color: theme.colors.textSecondary,
+    },
   });

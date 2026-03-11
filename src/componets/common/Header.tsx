@@ -15,18 +15,22 @@ export default function Header() {
         <TouchableOpacity style={styles.iconBtn} onPress={toggleTheme}>
           <Feather
             name={isDark ? "sun" : "moon"}
-            size={20}
-            color={theme.colors.textMid}
+            size={theme.iconSize.lg}
+            color={theme.colors.textSecondary}
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconBtn}>
-          <Feather name="settings" size={20} color={theme.colors.textMid} />
+          <Feather
+            name="settings"
+            size={theme.iconSize.lg}
+            color={theme.colors.textSecondary}
+          />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconBtn}>
           <Feather
             name="more-horizontal"
-            size={20}
-            color={theme.colors.textMid}
+            size={theme.iconSize.lg}
+            color={theme.colors.textSecondary}
           />
         </TouchableOpacity>
       </View>
