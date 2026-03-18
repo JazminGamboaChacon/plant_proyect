@@ -1,20 +1,22 @@
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Pressable,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather, Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
 import { createStyles } from "./LoginScreen.styles";
 
 export default function LoginScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
@@ -89,7 +91,9 @@ export default function LoginScreen() {
                 <Pressable
                   onPress={() => setShowPassword((prev) => !prev)}
                   accessibilityRole="button"
-                  accessibilityLabel={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  accessibilityLabel={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
                   style={styles.eyeButton}
                 >
                   <Feather
@@ -138,7 +142,11 @@ export default function LoginScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Continuar con Apple"
               >
-                <Ionicons name="logo-apple" size={18} color={theme.colors.textPrimary} />
+                <Ionicons
+                  name="logo-apple"
+                  size={18}
+                  color={theme.colors.textPrimary}
+                />
                 <Text style={styles.socialText}>Continue with Apple</Text>
               </TouchableOpacity>
             </View>
@@ -147,6 +155,7 @@ export default function LoginScreen() {
           <View style={styles.registerRow}>
             <Text style={styles.registerText}>New here? </Text>
             <TouchableOpacity
+              onPress={() => router.push("/register")}
               accessibilityRole="button"
               accessibilityLabel="Unirse al jardín"
             >
