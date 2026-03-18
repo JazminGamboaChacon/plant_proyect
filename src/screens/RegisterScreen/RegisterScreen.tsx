@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     KeyboardAvoidingView,
@@ -15,6 +16,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { createStyles } from "./RegisterScreen.styles";
 
 export default function RegisterScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
@@ -161,6 +163,7 @@ export default function RegisterScreen() {
 
             {/* Continue button */}
             <TouchableOpacity
+              onPress={() => router.push("/profile-setup")}
               style={styles.continueButton}
               accessibilityRole="button"
               accessibilityLabel="Continuar con el registro"
