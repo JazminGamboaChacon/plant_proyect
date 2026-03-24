@@ -31,7 +31,20 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
+
+# Credentials
+**/serviceAccountKey.json
+**/credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
 
 # typescript
 *.tsbuildinfo
