@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     KeyboardAvoidingView,
@@ -14,6 +15,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { createStyles } from "./ProfileSetupScreen.styles";
 
 export default function ProfileSetupScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
@@ -153,6 +155,7 @@ export default function ProfileSetupScreen() {
             {/* Botones Back y Continue */}
             <View style={styles.buttonsRow}>
               <TouchableOpacity
+                onPress={() => router.back()}
                 style={styles.backButton}
                 accessibilityRole="button"
                 accessibilityLabel="Regresar"
@@ -166,6 +169,7 @@ export default function ProfileSetupScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
+                onPress={() => router.push("/preference")}
                 style={styles.continueButton}
                 accessibilityRole="button"
                 accessibilityLabel="Continuar"
