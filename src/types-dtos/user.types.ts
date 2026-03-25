@@ -41,9 +41,9 @@ export type UserProfileData = {
   streak: number;
   friends: number;
   plants: number;
-  favoritePlant: FavoritePlant;
+  favoritePlant: FavoritePlant | null;
   categories: Category[];
   achievements: Achievement[];
   profileCompletion: number;
-  plantOfTheDay: PlantOfTheDay;
+  plantOfTheDay: PlantOfTheDay | null;
 };
