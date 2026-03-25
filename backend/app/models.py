@@ -1,121 +1,81 @@
-from typing import Literal
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class FirestoreBaseModel(BaseModel):
     id: str
     createdAt: str
-    updatedAt: str
+
+
+class UserStatsEmbed(BaseModel):
+    totalPlants: int
+    totalAchievements: int
+    daysActive: int
 
 
 class UserModel(FirestoreBaseModel):
     email: str
-    displayName: str
-    firstName: str
-    lastName: str
     username: str
-    avatarId: str
-    provider: Literal["password", "google", "apple"]
-    acceptedTerms: bool
-    headline: str
-    visibility: Literal["public", "private", "contacts"]
-    birthDate: str
-    streakDays: int
-    streakText: str
-    favoritePlantId: str
-    themePreference: Literal["system", "light", "dark"]
+    fullName: str
+    birthday: str
+    photoURL: str | None = None
+    isPublicProfile: bool
+    favoritePlantTypes: list[str]
+    stats: UserStatsEmbed
 
 
-class UserStatModel(FirestoreBaseModel):
-    userId: str
-    label: str
-    value: str
-    helper: str
-    order: int
-
-
-class UserInfoTileModel(FirestoreBaseModel):
-    userId: str
-    kind: Literal["birthDate", "visibility"]
-    iconType: str
-    iconEmoji: str
-    order: int
-
-
-class CategoryModel(FirestoreBaseModel):
-    userId: str
-    name: str
-    iconType: str
-    iconEmoji: str
-    count: int
-    order: int
-
-
-class PlantCategorySnapshot(BaseModel):
+class AchievementModel(BaseModel):
     id: str
-    name: str
-    iconType: str
-    iconEmoji: str
+    key: str
+    label: str
+    description: str
+    icon: str
+
+
+class UserAchievementModel(BaseModel):
+    id: str
+    userId: str
+    achievementId: str
+    unlockedAt: str
 
 
 class PlantModel(FirestoreBaseModel):
     userId: str
-    name: str
-    nickname: str
+    commonName: str
     scientificName: str
-    iconType: str
-    iconEmoji: str
-    categories: list[PlantCategorySnapshot]
-    status: Literal["needs_care_today", "scheduled_soon", "on_track"]
-    progress: int
-    favorite: bool
-    careFrequencyPerWeek: int
-    description: str
-    order: int
-
-
-class PlantTagModel(FirestoreBaseModel):
-    userId: str
-    plantId: str
-    value: str
-    order: int
-
-
-class CareScheduleModel(FirestoreBaseModel):
-    userId: str
-    plantId: str
-    plantName: str
-    iconType: str
-    iconEmoji: str
-    type: Literal["watering", "inspection"]
-    status: Literal["pending", "completed"]
-    scheduledFor: str
-
-
-class CareHistoryModel(FirestoreBaseModel):
-    userId: str
-    plantId: str
-    plantName: str
-    iconType: str
-    iconEmoji: str
-    type: Literal["watering", "inspection"]
-    status: Literal["completed", "skipped"]
-    completedAt: str
+    photoURL: str | None = None
+    type: str
+    groupId: str
+    isFavorite: bool
     notes: str
+
+
+class GroupModel(FirestoreBaseModel):
+    userId: str
+    name: str
+
+
+class PlantTypeModel(BaseModel):
+    id: str
+    label: str
+    icon: str
+    lib: str
+
+
+class AchievementWithEarned(BaseModel):
+    id: str
+    key: str
+    label: str
+    description: str
+    icon: str
+    earned: bool
 
 
 class UserProfileResponse(BaseModel):
     user: UserModel
-    stats: list[UserStatModel]
-    infoTiles: list[UserInfoTileModel]
-    categories: list[CategoryModel]
-    favoritePlant: PlantModel | None = None
-
-
-class PlantDetailResponse(BaseModel):
-    plant: PlantModel
-    tags: list[PlantTagModel] = Field(default_factory=list)
+    plants: list[PlantModel]
+    groups: list[GroupModel]
+    plantTypes: list[PlantTypeModel]
+    achievements: list[AchievementWithEarned]
 
 
 class ApiCollectionResponse(BaseModel):
