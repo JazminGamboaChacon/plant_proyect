@@ -1,17 +1,14 @@
 from fastapi import APIRouter
 
 from .models import (
+    AchievementModel,
+    AchievementWithEarned,
     ApiCollectionResponse,
-    CareHistoryModel,
-    CareScheduleModel,
-    CategoryModel,
-    PlantDetailResponse,
+    GroupModel,
     PlantModel,
-    PlantTagModel,
-    UserInfoTileModel,
+    PlantTypeModel,
     UserModel,
     UserProfileResponse,
-    UserStatModel,
 )
 from .services import get_collection, get_document
 
@@ -31,92 +28,60 @@ def read_user(user_id: str) -> dict:
 @router.get("/api/users/{user_id}/profile", response_model=UserProfileResponse)
 def read_user_profile(user_id: str) -> dict:
     user = get_document("users", user_id)
-    stats = get_collection("userStats", filters=[("userId", "==", user_id)], order_by="order")
-    info_tiles = get_collection(
-        "userInfoTiles",
-        filters=[("userId", "==", user_id)],
-        order_by="order",
-    )
-    categories = get_collection(
-        "categories",
-        filters=[("userId", "==", user_id)],
-        order_by="order",
-    )
+    plants = get_collection("plants", filters=[("userId", "==", user_id)])
+    groups = get_collection("groups", filters=[("userId", "==", user_id)])
+    plant_types = get_collection("plantTypes")
 
-    favorite_plant = None
-    favorite_plant_id = user.get("favoritePlantId")
-    if isinstance(favorite_plant_id, str) and favorite_plant_id:
-        favorite_plant = get_document("plants", favorite_plant_id)
+    all_achievements = get_collection("achievements")
+    user_achievements = get_collection(
+        "userAchievements", filters=[("userId", "==", user_id)]
+    )
+    earned_ids = {ua["achievementId"] for ua in user_achievements}
+
+    achievements = [
+        {**a, "earned": a["id"] in earned_ids} for a in all_achievements
+    ]
 
     return {
         "user": user,
-        "stats": stats,
-        "infoTiles": info_tiles,
-        "categories": categories,
-        "favoritePlant": favorite_plant,
+        "plants": plants,
+        "groups": groups,
+        "plantTypes": plant_types,
+        "achievements": achievements,
     }
 
 
 @router.get("/api/users/{user_id}/plants", response_model=list[PlantModel])
 def read_user_plants(user_id: str) -> list[dict]:
-    return get_collection("plants", filters=[("userId", "==", user_id)], order_by="order")
+    return get_collection("plants", filters=[("userId", "==", user_id)])
 
 
-@router.get("/api/plants/{plant_id}", response_model=PlantDetailResponse)
+@router.get("/api/plants/{plant_id}", response_model=PlantModel)
 def read_plant_detail(plant_id: str) -> dict:
-    plant = get_document("plants", plant_id)
-    tags = get_collection("plantTags", filters=[("plantId", "==", plant_id)], order_by="order")
-    return {"plant": plant, "tags": tags}
+    return get_document("plants", plant_id)
 
 
-@router.get("/api/users/{user_id}/categories", response_model=list[CategoryModel])
-def read_user_categories(user_id: str) -> list[dict]:
-    return get_collection(
-        "categories",
-        filters=[("userId", "==", user_id)],
-        order_by="order",
+@router.get("/api/users/{user_id}/groups", response_model=list[GroupModel])
+def read_user_groups(user_id: str) -> list[dict]:
+    return get_collection("groups", filters=[("userId", "==", user_id)])
+
+
+@router.get(
+    "/api/users/{user_id}/achievements",
+    response_model=list[AchievementWithEarned],
+)
+def read_user_achievements(user_id: str) -> list[dict]:
+    all_achievements = get_collection("achievements")
+    user_achievements = get_collection(
+        "userAchievements", filters=[("userId", "==", user_id)]
     )
+    earned_ids = {ua["achievementId"] for ua in user_achievements}
+    return [{**a, "earned": a["id"] in earned_ids} for a in all_achievements]
 
 
-@router.get("/api/users/{user_id}/plant-tags", response_model=list[PlantTagModel])
-def read_user_plant_tags(user_id: str) -> list[dict]:
-    return get_collection(
-        "plantTags",
-        filters=[("userId", "==", user_id)],
-        order_by="order",
-    )
-
-
-@router.get("/api/users/{user_id}/care-schedule", response_model=list[CareScheduleModel])
-def read_user_care_schedule(user_id: str) -> list[dict]:
-    return get_collection(
-        "careSchedule",
-        filters=[("userId", "==", user_id)],
-        order_by="scheduledFor",
-    )
-
-
-@router.get("/api/users/{user_id}/care-history", response_model=list[CareHistoryModel])
-def read_user_care_history(user_id: str) -> list[dict]:
-    return get_collection(
-        "careHistory",
-        filters=[("userId", "==", user_id)],
-        order_by="completedAt",
-    )
-
-
-@router.get("/api/users/{user_id}/stats", response_model=list[UserStatModel])
-def read_user_stats(user_id: str) -> list[dict]:
-    return get_collection("userStats", filters=[("userId", "==", user_id)], order_by="order")
-
-
-@router.get("/api/users/{user_id}/info-tiles", response_model=list[UserInfoTileModel])
-def read_user_info_tiles(user_id: str) -> list[dict]:
-    return get_collection(
-        "userInfoTiles",
-        filters=[("userId", "==", user_id)],
-        order_by="order",
-    )
+@router.get("/api/plant-types", response_model=list[PlantTypeModel])
+def read_plant_types() -> list[dict]:
+    return get_collection("plantTypes")
 
 
 @router.get("/api/collections/{collection_name}", response_model=ApiCollectionResponse)
