@@ -3,15 +3,12 @@ import { AppTheme } from "../../theme/tokens/types";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
-    flex: {
-      flex: 1,
-    },
     safeArea: {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
     scrollContent: {
-      flexGrow: 1,
+      flex: 1,
       justifyContent: "center",
       paddingHorizontal: theme.spacing.lg,
       paddingVertical: theme.spacing.xl,
@@ -57,131 +54,35 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: theme.typography.sizes.lg,
       color: theme.colors.textPrimary,
       textAlign: "center",
-      marginBottom: theme.spacing.xs,
+    },
+    subtitle: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
+      textAlign: "center",
+      marginBottom: theme.spacing.sm,
     },
 
-    // Fields
-    fieldContainer: {
-      gap: 6,
-    },
-    label: {
-      fontFamily: "Inter_500Medium",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textPrimary,
-    },
-    inputWrapper: {
+    // Google button
+    googleButton: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       backgroundColor: theme.colors.background,
       borderWidth: 1,
       borderColor: theme.colors.border,
       borderRadius: theme.radius.md,
-      paddingHorizontal: theme.spacing.md,
       height: 52,
-    },
-    inputIcon: {
-      marginRight: theme.spacing.sm,
-    },
-    input: {
-      flex: 1,
-      fontFamily: "Inter_400Regular",
-      fontSize: theme.typography.sizes.md,
-      color: theme.colors.textPrimary,
-      height: "100%",
-    },
-    eyeButton: {
-      padding: 4,
-    },
-
-    // Forgot password
-    forgotContainer: {
-      alignSelf: "flex-end",
-      marginTop: -theme.spacing.xs,
-    },
-    forgotText: {
-      fontFamily: "Inter_400Regular",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.teal,
-    },
-
-    // Sign In button
-    signInButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.radius.md,
-      height: 48,
-      alignItems: "center",
-      justifyContent: "center",
-      marginTop: theme.spacing.xs,
+      gap: theme.spacing.sm,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
+      shadowOpacity: 0.1,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 2,
     },
-    signInText: {
+    googleButtonText: {
       fontFamily: "Inter_500Medium",
       fontSize: theme.typography.sizes.md,
-      color: "#F6F9F6",
-    },
-
-    // Divider
-    dividerRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.sm,
-      marginVertical: theme.spacing.xs,
-    },
-    dividerLine: {
-      flex: 1,
-      height: 1,
-      backgroundColor: theme.colors.border,
-    },
-    dividerText: {
-      fontFamily: "Inter_400Regular",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textSecondary,
-    },
-
-    // Social buttons
-    socialContainer: {
-      gap: theme.spacing.sm,
-    },
-    socialButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: theme.colors.background,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.md,
-      height: 48,
-      gap: theme.spacing.sm,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 1,
-    },
-    socialText: {
-      fontFamily: "Inter_500Medium",
-      fontSize: theme.typography.sizes.sm,
       color: theme.colors.textPrimary,
-    },
-
-    // Register
-    registerRow: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    registerText: {
-      fontFamily: "Inter_400Regular",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textSecondary,
-    },
-    registerLink: {
-      fontFamily: "Inter_500Medium",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.primary,
     },
   });
