@@ -19,6 +19,9 @@ class Settings:
             origin.strip() for origin in raw_cors_origins.split(",") if origin.strip()
         ] or ["*"]
 
+        self.google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+        self.jwt_secret = os.getenv("JWT_SECRET", "change-me")
+
         configured_service_account = os.getenv(
             "FIREBASE_SERVICE_ACCOUNT_PATH",
             "./../serviceAccountKey.json",
