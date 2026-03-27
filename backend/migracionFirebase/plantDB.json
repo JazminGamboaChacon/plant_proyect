@@ -1,0 +1,141 @@
+{
+  "collections": {
+    "users": [
+      {
+        "id": "user-1",
+        "email": "jazgamboac@gmail.com",
+        "username": "jazgamboac",
+        "fullName": "Jazmin Gamboa Chacón",
+        "birthday": "1998-05-14",
+        "photoURL": null,
+        "isPublicProfile": true,
+        "favoritePlantTypes": ["succulents", "flowering", "herbs"],
+        "stats": {
+          "totalPlants": 12,
+          "totalAchievements": 5,
+          "daysActive": 34
+        },
+        "createdAt": "2026-03-01T08:00:00.000Z"
+      },
+      {
+        "id": "user-2",
+        "email": "carlos.mora@gmail.com",
+        "username": "carlosmora",
+        "fullName": "Carlos Mora Jiménez",
+        "birthday": "1995-11-22",
+        "photoURL": null,
+        "isPublicProfile": false,
+        "favoritePlantTypes": ["tropical", "cacti"],
+        "stats": {
+          "totalPlants": 4,
+          "totalAchievements": 2,
+          "daysActive": 10
+        },
+        "createdAt": "2026-03-05T10:00:00.000Z"
+      },
+      {
+        "id": "user-3",
+        "email": "laura.vega@gmail.com",
+        "username": "lauravega",
+        "fullName": "Laura Vega Solano",
+        "birthday": "2001-03-08",
+        "photoURL": null,
+        "isPublicProfile": true,
+        "favoritePlantTypes": ["ferns", "tropical", "flowering"],
+        "stats": {
+          "totalPlants": 7,
+          "totalAchievements": 3,
+          "daysActive": 21
+        },
+        "createdAt": "2026-03-10T14:00:00.000Z"
+      }
+    ],
+
+    "achievements": [
+      { "id": "achievement-1", "key": "first_plant", "label": "First Plant",  "description": "Added your first plant",        "icon": "leaf"    },
+      { "id": "achievement-2", "key": "green_thumb",  "label": "Green Thumb",  "description": "Added 10 plants",               "icon": "flower"  },
+      { "id": "achievement-3", "key": "week_streak",  "label": "Week Streak",  "description": "Active 7 days in a row",        "icon": "flame"   },
+      { "id": "achievement-4", "key": "explorer",     "label": "Explorer",     "description": "Tried 3 different plant types", "icon": "compass" },
+      { "id": "achievement-5", "key": "gardener",     "label": "Gardener",     "description": "Created your first group",      "icon": "grid"    }
+    ],
+
+    "userAchievements": [
+      { "id": "ua-1",  "userId": "user-1", "achievementId": "achievement-1", "unlockedAt": "2026-03-02T09:00:00.000Z" },
+      { "id": "ua-2",  "userId": "user-1", "achievementId": "achievement-2", "unlockedAt": "2026-03-10T14:00:00.000Z" },
+      { "id": "ua-3",  "userId": "user-1", "achievementId": "achievement-3", "unlockedAt": "2026-03-08T08:00:00.000Z" },
+      { "id": "ua-4",  "userId": "user-1", "achievementId": "achievement-4", "unlockedAt": "2026-03-05T11:00:00.000Z" },
+      { "id": "ua-5",  "userId": "user-1", "achievementId": "achievement-5", "unlockedAt": "2026-03-03T10:00:00.000Z" },
+      { "id": "ua-6",  "userId": "user-2", "achievementId": "achievement-1", "unlockedAt": "2026-03-06T08:30:00.000Z" },
+      { "id": "ua-7",  "userId": "user-2", "achievementId": "achievement-3", "unlockedAt": "2026-03-12T09:00:00.000Z" },
+      { "id": "ua-8",  "userId": "user-3", "achievementId": "achievement-1", "unlockedAt": "2026-03-11T16:00:00.000Z" },
+      { "id": "ua-9",  "userId": "user-3", "achievementId": "achievement-2", "unlockedAt": "2026-03-15T10:00:00.000Z" },
+      { "id": "ua-10", "userId": "user-3", "achievementId": "achievement-4", "unlockedAt": "2026-03-13T12:00:00.000Z" }
+    ],
+
+    "plants": [
+      {
+        "id": "plant-1",
+        "userId": "user-1",
+        "commonName": "Calathea majestuosa",
+        "scientificName": "Goeppertia majestica",
+        "photoURL": null,
+        "type": "tropical",
+        "groupId": "group-1",
+        "isFavorite": true,
+        "notes": "Le gusta la sombra, riego moderado",
+        "createdAt": "2026-03-02T09:00:00.000Z"
+      },
+      {
+        "id": "plant-2",
+        "userId": "user-1",
+        "commonName": "Lavanda",
+        "scientificName": "Lavandula angustifolia",
+        "photoURL": null,
+        "type": "herbs",
+        "groupId": "group-1",
+        "isFavorite": true,
+        "notes": "",
+        "createdAt": "2026-03-03T11:00:00.000Z"
+      },
+      {
+        "id": "plant-3",
+        "userId": "user-2",
+        "commonName": "Cactus San Pedro",
+        "scientificName": "Echinopsis pachanoi",
+        "photoURL": null,
+        "type": "cacti",
+        "groupId": "group-2",
+        "isFavorite": true,
+        "notes": "Muy poca agua",
+        "createdAt": "2026-03-06T08:30:00.000Z"
+      },
+      {
+        "id": "plant-4",
+        "userId": "user-3",
+        "commonName": "Helecho Boston",
+        "scientificName": "Nephrolepis exaltata",
+        "photoURL": null,
+        "type": "ferns",
+        "groupId": "group-3",
+        "isFavorite": false,
+        "notes": "Humedad alta, riego frecuente",
+        "createdAt": "2026-03-11T16:00:00.000Z"
+      }
+    ],
+
+    "groups": [
+      { "id": "group-1", "userId": "user-1", "name": "General", "createdAt": "2026-03-02T09:00:00.000Z" },
+      { "id": "group-2", "userId": "user-2", "name": "General", "createdAt": "2026-03-06T08:00:00.000Z" },
+      { "id": "group-3", "userId": "user-3", "name": "General", "createdAt": "2026-03-11T15:00:00.000Z" }
+    ],
+
+    "plantTypes": [
+      { "id": "succulents", "label": "Succulents", "icon": "cactus",    "lib": "material" },
+      { "id": "tropical",   "label": "Tropical",   "icon": "palm-tree", "lib": "material" },
+      { "id": "flowering",  "label": "Flowering",  "icon": "flower",    "lib": "material" },
+      { "id": "herbs",      "label": "Herbs",      "icon": "leaf",      "lib": "ionicons" },
+      { "id": "cacti",      "label": "Cacti",      "icon": "cactus",    "lib": "material" },
+      { "id": "ferns",      "label": "Ferns",      "icon": "sprout",    "lib": "material" }
+    ]
+  }
+}

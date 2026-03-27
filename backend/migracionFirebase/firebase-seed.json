@@ -1,0 +1,455 @@
+{
+  "collections": {
+    "users": [
+      {
+        "id": "mock-user-id",
+        "email": "granadosdaniel566@gmail.com",
+        "displayName": "Daniel G.M",
+        "firstName": "Daniel",
+        "lastName": "G.M",
+        "username": "granadosdaniel566@gmail.com",
+        "avatarId": "midori",
+        "provider": "password",
+        "acceptedTerms": true,
+        "headline": "Necesito comprar algo, por amor a Dios.",
+        "visibility": "public",
+        "birthDate": "2000-03-14",
+        "streakDays": 23,
+        "streakText": "Racha de cuidado",
+        "favoritePlantId": "p1",
+        "themePreference": "system",
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "userStats": [
+      {
+        "id": "mock-user-id-plants",
+        "userId": "mock-user-id",
+        "label": "Plantas",
+        "value": "24",
+        "helper": "Activas",
+        "order": 1,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "mock-user-id-categories",
+        "userId": "mock-user-id",
+        "label": "Categorías",
+        "value": "6",
+        "helper": "Tipos",
+        "order": 2,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "mock-user-id-care",
+        "userId": "mock-user-id",
+        "label": "Cuidados",
+        "value": "148",
+        "helper": "Registros",
+        "order": 3,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "userInfoTiles": [
+      {
+        "id": "mock-user-id-birth-date",
+        "userId": "mock-user-id",
+        "kind": "birthDate",
+        "iconType": "birthday",
+        "iconEmoji": "🌷",
+        "order": 1,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "mock-user-id-visibility",
+        "userId": "mock-user-id",
+        "kind": "visibility",
+        "iconType": "privacy",
+        "iconEmoji": "🔒",
+        "order": 2,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "categories": [
+      {
+        "id": "category-succulent",
+        "userId": "mock-user-id",
+        "name": "Suculentas",
+        "iconType": "succulent",
+        "iconEmoji": "🌵",
+        "count": 8,
+        "order": 1,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "category-tropical",
+        "userId": "mock-user-id",
+        "name": "Tropicales",
+        "iconType": "tropical",
+        "iconEmoji": "🌴",
+        "count": 5,
+        "order": 2,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "category-flowers",
+        "userId": "mock-user-id",
+        "name": "Flores",
+        "iconType": "flowers",
+        "iconEmoji": "🌸",
+        "count": 4,
+        "order": 3,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "category-indoor",
+        "userId": "mock-user-id",
+        "name": "Interior",
+        "iconType": "indoor",
+        "iconEmoji": "🌿",
+        "count": 3,
+        "order": 4,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "category-herbs",
+        "userId": "mock-user-id",
+        "name": "Hierbas",
+        "iconType": "herbs",
+        "iconEmoji": "🌱",
+        "count": 2,
+        "order": 5,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "category-bamboo",
+        "userId": "mock-user-id",
+        "name": "Bambú",
+        "iconType": "bamboo",
+        "iconEmoji": "🌼",
+        "count": 1,
+        "order": 6,
+        "createdAt": "2026-03-08T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "plants": [
+      {
+        "id": "p1",
+        "userId": "mock-user-id",
+        "name": "Cerezo Japonés",
+        "nickname": "Sakura",
+        "scientificName": "Prunus serrulata",
+        "iconType": "flowers",
+        "iconEmoji": "🌸",
+        "categories": [
+          {
+            "id": "category-flowers",
+            "name": "Flores",
+            "iconType": "flowers",
+            "iconEmoji": "🌸"
+          },
+          {
+            "id": "category-indoor",
+            "name": "Interior",
+            "iconType": "indoor",
+            "iconEmoji": "🌿"
+          }
+        ],
+        "status": "needs_care_today",
+        "progress": 92,
+        "favorite": true,
+        "careFrequencyPerWeek": 2,
+        "description": "Símbolo de la belleza efímera y la renovación. Su floración dura apenas días, recordándonos que lo más precioso también puede ser lo más fugaz.",
+        "order": 1,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p2",
+        "userId": "mock-user-id",
+        "name": "Pothos dorado",
+        "nickname": "Pothos",
+        "scientificName": "Epipremnum aureum",
+        "iconType": "indoor",
+        "iconEmoji": "🌿",
+        "categories": [
+          {
+            "id": "category-indoor",
+            "name": "Interior",
+            "iconType": "indoor",
+            "iconEmoji": "🌿"
+          }
+        ],
+        "status": "scheduled_soon",
+        "progress": 87,
+        "favorite": false,
+        "careFrequencyPerWeek": 1,
+        "description": "",
+        "order": 2,
+        "createdAt": "2026-03-02T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p3",
+        "userId": "mock-user-id",
+        "name": "Cactus estrella",
+        "nickname": "Cactus",
+        "scientificName": "Astrophytum asterias",
+        "iconType": "succulent",
+        "iconEmoji": "🌵",
+        "categories": [
+          {
+            "id": "category-succulent",
+            "name": "Suculentas",
+            "iconType": "succulent",
+            "iconEmoji": "🌵"
+          }
+        ],
+        "status": "on_track",
+        "progress": 100,
+        "favorite": false,
+        "careFrequencyPerWeek": 1,
+        "description": "",
+        "order": 3,
+        "createdAt": "2026-03-03T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p4",
+        "userId": "mock-user-id",
+        "name": "Monstera",
+        "nickname": "Monstera",
+        "scientificName": "Monstera deliciosa",
+        "iconType": "tropical",
+        "iconEmoji": "🪴",
+        "categories": [
+          {
+            "id": "category-tropical",
+            "name": "Tropicales",
+            "iconType": "tropical",
+            "iconEmoji": "🌴"
+          }
+        ],
+        "status": "scheduled_soon",
+        "progress": 78,
+        "favorite": false,
+        "careFrequencyPerWeek": 2,
+        "description": "",
+        "order": 4,
+        "createdAt": "2026-03-04T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p5",
+        "userId": "mock-user-id",
+        "name": "Lavanda",
+        "nickname": "Lavanda",
+        "scientificName": "Lavandula angustifolia",
+        "iconType": "herbs",
+        "iconEmoji": "💜",
+        "categories": [
+          {
+            "id": "category-herbs",
+            "name": "Hierbas",
+            "iconType": "herbs",
+            "iconEmoji": "🌱"
+          }
+        ],
+        "status": "needs_care_today",
+        "progress": 65,
+        "favorite": false,
+        "careFrequencyPerWeek": 2,
+        "description": "",
+        "order": 5,
+        "createdAt": "2026-03-05T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "plantTags": [
+      {
+        "id": "p1-tag-1",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "value": "Interior",
+        "order": 1,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p1-tag-2",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "value": "Flores",
+        "order": 2,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p1-tag-3",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "value": "Sol indirecto",
+        "order": 3,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p1-tag-4",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "value": "2x semana",
+        "order": 4,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p1-tag-5",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "value": "18-24 °C",
+        "order": 5,
+        "createdAt": "2026-03-01T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p2-tag-1",
+        "userId": "mock-user-id",
+        "plantId": "p2",
+        "value": "Colgante",
+        "order": 1,
+        "createdAt": "2026-03-02T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p2-tag-2",
+        "userId": "mock-user-id",
+        "plantId": "p2",
+        "value": "Fácil",
+        "order": 2,
+        "createdAt": "2026-03-02T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p3-tag-1",
+        "userId": "mock-user-id",
+        "plantId": "p3",
+        "value": "Suculenta",
+        "order": 1,
+        "createdAt": "2026-03-03T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p3-tag-2",
+        "userId": "mock-user-id",
+        "plantId": "p3",
+        "value": "Bajo mantenimiento",
+        "order": 2,
+        "createdAt": "2026-03-03T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p4-tag-1",
+        "userId": "mock-user-id",
+        "plantId": "p4",
+        "value": "Tropical",
+        "order": 1,
+        "createdAt": "2026-03-04T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p4-tag-2",
+        "userId": "mock-user-id",
+        "plantId": "p4",
+        "value": "Grande",
+        "order": 2,
+        "createdAt": "2026-03-04T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p5-tag-1",
+        "userId": "mock-user-id",
+        "plantId": "p5",
+        "value": "Aromática",
+        "order": 1,
+        "createdAt": "2026-03-05T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      },
+      {
+        "id": "p5-tag-2",
+        "userId": "mock-user-id",
+        "plantId": "p5",
+        "value": "Exterior",
+        "order": 2,
+        "createdAt": "2026-03-05T08:00:00.000Z",
+        "updatedAt": "2026-03-15T18:00:00.000Z"
+      }
+    ],
+    "careSchedule": [
+      {
+        "id": "t1",
+        "userId": "mock-user-id",
+        "plantId": "p1",
+        "plantName": "Cerezo Japonés",
+        "iconType": "flowers",
+        "iconEmoji": "🌸",
+        "type": "watering",
+        "status": "pending",
+        "scheduledFor": "2026-03-08T09:00:00.000Z",
+        "createdAt": "2026-03-07T18:00:00.000Z",
+        "updatedAt": "2026-03-07T18:00:00.000Z"
+      },
+      {
+        "id": "t2",
+        "userId": "mock-user-id",
+        "plantId": "p5",
+        "plantName": "Lavanda",
+        "iconType": "herbs",
+        "iconEmoji": "💜",
+        "type": "watering",
+        "status": "pending",
+        "scheduledFor": "2026-03-08T17:00:00.000Z",
+        "createdAt": "2026-03-07T18:00:00.000Z",
+        "updatedAt": "2026-03-07T18:00:00.000Z"
+      },
+      {
+        "id": "t3",
+        "userId": "mock-user-id",
+        "plantId": "p2",
+        "plantName": "Pothos dorado",
+        "iconType": "indoor",
+        "iconEmoji": "🌿",
+        "type": "watering",
+        "status": "pending",
+        "scheduledFor": "2026-03-09T14:00:00.000Z",
+        "createdAt": "2026-03-08T18:00:00.000Z",
+        "updatedAt": "2026-03-08T18:00:00.000Z"
+      },
+      {
+        "id": "t4",
+        "userId": "mock-user-id",
+        "plantId": "p3",
+        "plantName": "Cactus estrella",
+        "iconType": "succulent",
+        "iconEmoji": "🌵",
+        "type": "inspection",
+        "status": "pending",
+        "scheduledFor": "2026-03-12T11:00:00.000Z",
+        "createdAt": "2026-03-11T18:00:00.000Z",
+        "updatedAt": "2026-03-11T18:00:00.000Z"
+      }
+    ],
+    "careHistory": []
+  }
+}

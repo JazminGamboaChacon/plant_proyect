@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
@@ -11,10 +11,35 @@ import { useTheme } from "../../context/ThemeContext";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { createStyles } from "./UserProfile.style";
 
+const USER_ID = "user-1";
+
 export default function UserProfile() {
-  const user = useUserProfile();
+  const { data: user, loading, error } = useUserProfile(USER_ID);
   const { theme } = useTheme();
   const styles = createStyles(theme);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+          <Ionicons name="cloud-offline-outline" size={48} color={theme.colors.textSecondary} />
+          <Text style={{ color: theme.colors.textSecondary, marginTop: 12 }}>
+            {error || "Could not load profile"}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -29,20 +54,28 @@ export default function UserProfile() {
           {/* Perfil */}
           <View style={styles.profileSection}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+              {user.avatarUrl ? (
+                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+              ) : (
+                <View style={[styles.avatar, { backgroundColor: theme.colors.primaryLight, justifyContent: "center", alignItems: "center" }]}>
+                  <Ionicons name="person" size={theme.iconSize.lg} color={theme.colors.primary} />
+                </View>
+              )}
             </View>
             <Text style={styles.profileName}>{user.name}</Text>
             <Text style={styles.profileHandle}>{user.handle}</Text>
-            <View style={styles.bioCard}>
-              <View style={styles.bioIconBg}>
-                <Ionicons
-                  name="leaf"
-                  size={theme.iconSize.md}
-                  color={theme.colors.primary}
-                />
+            {user.bio ? (
+              <View style={styles.bioCard}>
+                <View style={styles.bioIconBg}>
+                  <Ionicons
+                    name="leaf"
+                    size={theme.iconSize.md}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <Text style={styles.bioText}>{user.bio}</Text>
               </View>
-              <Text style={styles.bioText}>{user.bio}</Text>
-            </View>
+            ) : null}
             <View style={styles.birthdayRow}>
               <Ionicons
                 name="gift-outline"
@@ -98,26 +131,37 @@ export default function UserProfile() {
           <Divider />
 
           {/* Planta favorita */}
-          <View style={styles.favPlantCard}>
-            <Image
-              source={{ uri: user.favoritePlant.imageUrl }}
-              style={styles.favPlantImg}
-            />
-            <View style={styles.favPlantInfo}>
-              <Text style={styles.favPlantLabel}>FAVORITE PLANT</Text>
-              <Text style={styles.favPlantName}>{user.favoritePlant.name}</Text>
-              <Text style={styles.favPlantFamily}>
-                {user.favoritePlant.family}
-              </Text>
-              <Text style={styles.favPlantSince}>
-                {user.favoritePlant.since}
-              </Text>
-            </View>
-          </View>
+          {user.favoritePlant ? (
+            <>
+              <View style={styles.favPlantCard}>
+                {user.favoritePlant.imageUrl ? (
+                  <Image
+                    source={{ uri: user.favoritePlant.imageUrl }}
+                    style={styles.favPlantImg}
+                  />
+                ) : (
+                  <View style={[styles.favPlantImg, { backgroundColor: theme.colors.primaryLight, justifyContent: "center", alignItems: "center" }]}>
+                    <MaterialCommunityIcons name="flower" size={32} color={theme.colors.primary} />
+                  </View>
+                )}
+                <View style={styles.favPlantInfo}>
+                  <Text style={styles.favPlantLabel}>FAVORITE PLANT</Text>
+                  <Text style={styles.favPlantName}>
+                    {user.favoritePlant.name}
+                  </Text>
+                  <Text style={styles.favPlantFamily}>
+                    {user.favoritePlant.family}
+                  </Text>
+                  <Text style={styles.favPlantSince}>
+                    {user.favoritePlant.since}
+                  </Text>
+                </View>
+              </View>
+              <Divider />
+            </>
+          ) : null}
 
-          <Divider />
-
-          {/* Categorías */}
+          {/* Categorias (plantTypes) */}
           <View style={styles.sectionHeader}>
             <MaterialCommunityIcons
               name="shape-outline"
