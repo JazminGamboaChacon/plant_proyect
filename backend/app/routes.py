@@ -1,9 +1,12 @@
 from fastapi import APIRouter
 
+from .auth import create_session_token, get_or_create_user, verify_google_token
 from .models import (
     AchievementModel,
     AchievementWithEarned,
     ApiCollectionResponse,
+    AuthResponse,
+    GoogleAuthRequest,
     GroupModel,
     PlantModel,
     PlantTypeModel,
@@ -13,6 +16,14 @@ from .models import (
 from .services import get_collection, get_document
 
 router = APIRouter()
+
+
+@router.post("/api/auth/google", response_model=AuthResponse)
+def google_auth(body: GoogleAuthRequest) -> dict:
+    google_payload = verify_google_token(body.id_token)
+    user, is_new_user = get_or_create_user(google_payload)
+    token = create_session_token(user["id"])
+    return {"user": user, "token": token, "is_new_user": is_new_user}
 
 
 @router.get("/health")
