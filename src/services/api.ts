@@ -74,6 +74,26 @@ export type ApiUserProfileResponse = {
   achievements: ApiAchievement[];
 };
 
+export type AuthResponse = {
+  user: ApiUser;
+  token: string;
+  is_new_user: boolean;
+};
+
+export async function authGoogleSignIn(
+  idToken: string
+): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id_token: idToken }),
+  });
+  if (!res.ok) {
+    throw new Error(`Auth error ${res.status}`);
+  }
+  return res.json();
+}
+
 export function fetchUserProfile(
   userId: string
 ): Promise<ApiUserProfileResponse> {
