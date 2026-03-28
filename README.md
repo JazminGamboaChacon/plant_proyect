@@ -1,50 +1,141 @@
-# Welcome to your Expo app 👋
+# Plant Project
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil de gestión de plantas construida con **Expo (React Native)** en el frontend y **FastAPI + Firebase Firestore** en el backend.
 
-## Get started
+---
 
-1. Install dependencies
+## Requisitos previos
 
-   ```bash
-   npm install
-   ```
+- [Node.js](https://nodejs.org/) v18 o superior
+- [Python](https://www.python.org/) 3.10 o superior
+- Una cuenta en [Firebase](https://firebase.google.com/) con un proyecto de Firestore creado
+- [Expo Go](https://expo.dev/go) instalado en el dispositivo móvil (opcional, para probar en físico)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 1. Configurar Firebase
 
-In the output, you'll find options to open the app in a
+1. En la [Firebase Console](https://console.firebase.google.com/), abre tu proyecto
+2. Ve a **Configuración del proyecto → Cuentas de servicio**
+3. Haz clic en **Generar nueva clave privada** y descarga el archivo JSON
+4. Coloca el archivo en `backend/migracionFirebase/serviceAccountKey.json`
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Cargar datos iniciales (opcional)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Si necesitas poblar Firestore con datos de prueba:
 
 ```bash
-npm run reset-project
+cd backend
+python migracionFirebase/initial_firebase/seed_firestore.py \
+  --credentials migracionFirebase/serviceAccountKey.json
+
+# Solo previsualizar sin escribir:
+python migracionFirebase/initial_firebase/seed_firestore.py \
+  --credentials migracionFirebase/serviceAccountKey.json \
+  --dry-run
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 2. Configurar el Backend
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+cd backend
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Crear entorno virtual
+python -m venv .venv
 
-## Join the community
+# Activar entorno virtual (Windows)
+.venv\Scripts\activate
 
-Join our community of developers creating universal apps.
+# Instalar dependencias
+pip install -r requirements.txt
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Variables de entorno
+
+Copia el archivo de ejemplo y edítalo:
+
+```bash
+copy .env.example .env
+```
+
+Abre `backend/.env` y ajusta los valores:
+
+```env
+API_HOST=127.0.0.1
+API_PORT=<puerto>
+API_ENV=development
+FIREBASE_SERVICE_ACCOUNT_PATH=<ruta-absoluta-al-serviceAccountKey.json>
+CORS_ORIGINS=<origenes-separados-por-coma>
+```
+
+### Correr el backend
+
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port <API_PORT>
+```
+
+El servidor queda disponible en `http://127.0.0.1:<API_PORT>`.
+Documentación interactiva: `http://127.0.0.1:<API_PORT>/docs`
+
+> **Nota:** Reemplaza `<API_PORT>` con el valor que definiste en `.env`. Si el puerto ya está ocupado, cámbialo en `.env` y actualiza también `src/services/api.ts`.
+
+---
+
+## 3. Configurar el Frontend
+
+```bash
+# Desde la raíz del proyecto
+npm install
+```
+
+### Variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto (está en `.gitignore`, no se sube al repo):
+
+```bash
+copy .env.example .env
+```
+
+Edita `.env` con la URL del backend según tu plataforma:
+
+```env
+# Web / iOS / dispositivo físico:
+EXPO_PUBLIC_API_URL=http://127.0.0.1:<PORT>
+
+# Emulador Android (10.0.2.2 mapea al localhost del PC):
+# EXPO_PUBLIC_API_URL=http://10.0.2.2:<PORT>
+```
+
+Reemplaza `<PORT>` con el mismo valor que definiste en `backend/.env`.
+
+### Correr el frontend
+
+```bash
+npm start
+```
+
+Luego selecciona la plataforma:
+- Presiona `a` → Android emulator
+- Presiona `w` → Navegador web
+- Escanea el QR con Expo Go → Dispositivo físico
+
+---
+
+## Endpoints del API
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/health` | Estado del servidor |
+| GET | `/api/users/{userId}` | Datos del usuario |
+| GET | `/api/users/{userId}/profile` | Perfil completo (plantas, grupos, logros) |
+| GET | `/api/users/{userId}/plants` | Plantas del usuario |
+| GET | `/api/plants/{plantId}` | Detalle de una planta |
+| GET | `/api/users/{userId}/groups` | Grupos del usuario |
+| GET | `/api/users/{userId}/achievements` | Logros del usuario |
+| GET | `/api/plant-types` | Tipos de plantas disponibles |
+| PUT | `/api/users/{userId}` | Actualizar usuario |
+| PUT | `/api/plants/{plantId}` | Actualizar planta |
+| GET | `/api/collections/{name}` | Ver cualquier colección de Firestore |
