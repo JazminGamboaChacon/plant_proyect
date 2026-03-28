@@ -63,12 +63,22 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
   const favPlant = plants.find((p) => p.isFavorite) || null;
   const favoritePlant = favPlant
     ? {
+        id: favPlant.id,
         name: favPlant.commonName,
         family: favPlant.scientificName,
         since: `Added ${new Date(favPlant.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
         imageUrl: favPlant.photoURL || "",
       }
     : null;
+
+  const plantsList = plants.map((p) => ({
+    id: p.id,
+    commonName: p.commonName,
+    scientificName: p.scientificName,
+    type: p.type,
+    isFavorite: p.isFavorite,
+    photoURL: p.photoURL,
+  }));
 
   // Profile completion: count filled fields
   const fields = [
@@ -95,6 +105,7 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     achievements: mappedAchievements,
     profileCompletion,
     plantOfTheDay: null,
+    plantsList,
   };
 }
 
