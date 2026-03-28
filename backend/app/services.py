@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import HTTPException
+from firebase_admin import firestore
 
 from .firebase import get_firestore_client
 
@@ -58,3 +59,23 @@ def get_collection(
         query = query.order_by(order_by)
 
     return [_serialize_document(document) for document in query.stream()]
+
+
+def update_document(
+    collection_name: str, document_id: str, data: dict[str, Any]
+) -> dict[str, Any]:
+    db = get_firestore_client()
+    doc_ref = db.collection(collection_name).document(document_id)
+    snapshot = doc_ref.get()
+
+    if not snapshot.exists:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontro el documento '{document_id}' en '{collection_name}'.",
+        )
+
+    data["updatedAt"] = firestore.SERVER_TIMESTAMP
+    doc_ref.update(data)
+
+    updated = doc_ref.get()
+    return _serialize_document(updated)
