@@ -1,9 +1,13 @@
-//import UserProfile from "@/src/screens/userProfile/UserProfile";
-//export default function Index() {
-//  return <UserProfile />;
-//}
-import LoginScreen from "@/src/screens/Login/LoginScreen";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
 
 export default function Index() {
-  return <LoginScreen />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/(tabs)/profile" as any);
+  }, [router]);
+
+  return <View style={{ flex: 1 }} />;
 }
