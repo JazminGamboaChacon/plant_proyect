@@ -1,17 +1,22 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { CameraView } from "expo-camera";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../context/ThemeContext";
+import { useCamera } from "../../hooks/useCamera";
 import { createStyles } from "./ProfileSetupScreen.styles";
 
 export default function ProfileSetupScreen() {
@@ -22,6 +27,34 @@ export default function ProfileSetupScreen() {
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [birthday, setBirthday] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  const {
+    cameraRef,
+    isPermissionGranted,
+    facing,
+    flashMode,
+    requestPermissions,
+    takePhoto,
+    toggleFacing,
+    toggleFlash,
+  } = useCamera({ requestOnMount: false });
+
+  const handleCameraPress = async () => {
+    if (!isPermissionGranted) {
+      await requestPermissions();
+    }
+    setShowCamera(true);
+  };
+
+  const handleCapture = async () => {
+    const photo = await takePhoto({ quality: 0.8 });
+    if (photo) {
+      setAvatarUri(photo.uri);
+      setShowCamera(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -72,11 +105,19 @@ export default function ProfileSetupScreen() {
 
             {/* Avatar */}
             <View style={styles.avatarContainer}>
-              <View style={styles.avatarCircle}>
-                <Feather name="camera" size={28} color={theme.colors.primary} />
+              <View style={[styles.avatarCircle, avatarUri ? { borderStyle: "solid" } : null]}>
+                {avatarUri ? (
+                  <Image
+                    source={{ uri: avatarUri }}
+                    style={{ width: 76, height: 76, borderRadius: 38 }}
+                  />
+                ) : (
+                  <Feather name="camera" size={28} color={theme.colors.primary} />
+                )}
               </View>
               <TouchableOpacity
                 style={styles.avatarEditButton}
+                onPress={handleCameraPress}
                 accessibilityRole="button"
                 accessibilityLabel="Cambiar foto de perfil"
               >
@@ -192,6 +233,106 @@ export default function ProfileSetupScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Camera Modal */}
+      <Modal visible={showCamera} animationType="slide" statusBarTranslucent>
+        {isPermissionGranted ? (
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+            <CameraView
+              ref={cameraRef as React.RefObject<CameraView>}
+              style={{ flex: 1 }}
+              facing={facing}
+              flash={flashMode}
+            >
+              <SafeAreaView style={cameraStyles.overlay}>
+                <TouchableOpacity
+                  onPress={() => setShowCamera(false)}
+                  style={cameraStyles.closeBtn}
+                >
+                  <Feather name="x" size={28} color="#fff" />
+                </TouchableOpacity>
+                <View style={cameraStyles.controls}>
+                  <TouchableOpacity onPress={toggleFlash} style={cameraStyles.sideBtn}>
+                    <Feather
+                      name={flashMode === "off" ? "zap-off" : "zap"}
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleCapture}
+                    style={cameraStyles.captureBtn}
+                  />
+                  <TouchableOpacity onPress={toggleFacing} style={cameraStyles.sideBtn}>
+                    <Feather name="refresh-cw" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </SafeAreaView>
+            </CameraView>
+          </View>
+        ) : (
+          <View style={cameraStyles.permissionView}>
+            <Feather name="camera-off" size={48} color="#888" />
+            <Text style={cameraStyles.permissionText}>
+              Se necesita permiso de cámara
+            </Text>
+            <TouchableOpacity
+              onPress={requestPermissions}
+              style={cameraStyles.permissionBtn}
+            >
+              <Text style={{ color: "#fff" }}>Otorgar permisos</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </Modal>
     </SafeAreaView>
   );
 }
+
+const cameraStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  closeBtn: {
+    alignSelf: "flex-end",
+    margin: 16,
+    padding: 8,
+  },
+  controls: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingBottom: 40,
+    paddingHorizontal: 32,
+  },
+  captureBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#fff",
+    borderWidth: 4,
+    borderColor: "rgba(255,255,255,0.5)",
+  },
+  sideBtn: {
+    padding: 12,
+  },
+  permissionView: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  permissionText: {
+    color: "#fff",
+    marginTop: 16,
+    fontSize: 16,
+  },
+  permissionBtn: {
+    marginTop: 24,
+    backgroundColor: "#333",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+});

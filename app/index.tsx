@@ -6,7 +6,7 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/(tabs)/profile" as any);
+    router.replace("/(tabs)" as any);
   }, [router]);
 
   return <View style={{ flex: 1 }} />;
