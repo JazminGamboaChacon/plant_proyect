@@ -24,7 +24,7 @@ def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.get("/api/users/{user_id}")
+@router.get("/api/users/{user_id}", response_model=UserModel)
 def read_user(user_id: str) -> dict:
     return get_document("users", user_id)
 
