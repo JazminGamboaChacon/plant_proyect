@@ -19,6 +19,8 @@ class Settings:
             origin.strip() for origin in raw_cors_origins.split(",") if origin.strip()
         ] or ["*"]
 
+        self.firebase_service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+
         configured_service_account = os.getenv(
             "FIREBASE_SERVICE_ACCOUNT_PATH",
             "./../serviceAccountKey.json",
