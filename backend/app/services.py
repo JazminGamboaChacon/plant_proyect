@@ -1,46 +1,61 @@
+import json
+from pathlib import Path
 from typing import Any
-
 from fastapi import HTTPException
-from firebase_admin import firestore
 
-from .firebase import get_firestore_client
+# Ruta al archivo de datos
+PLANT_DB_PATH = Path(__file__).parent.parent / "migracionFirebase" / "plantDB.json"
 
-
-def _serialize_value(value: Any) -> Any:
-    if hasattr(value, "isoformat"):
-        return value.isoformat()
-
-    if isinstance(value, list):
-        return [_serialize_value(item) for item in value]
-
-    if isinstance(value, dict):
-        return {
-            nested_key: _serialize_value(nested_value)
-            for nested_key, nested_value in value.items()
-        }
-
-    return value
+# Cache en memoria
+_db_cache: dict[str, Any] | None = None
 
 
-def _serialize_document(document) -> dict[str, Any]:
-    payload = {
-        key: _serialize_value(value) for key, value in document.to_dict().items()
-    }
-    payload["id"] = document.id
-    return payload
+def _load_db() -> dict[str, list[dict[str, Any]]]:
+    """Carga el JSON en memoria"""
+    global _db_cache
+    if _db_cache is not None:
+        return _db_cache
+
+    if not PLANT_DB_PATH.exists():
+        raise FileNotFoundError(f"No se encontró la base de datos: {PLANT_DB_PATH}")
+
+    with open(PLANT_DB_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    _db_cache = data.get("collections", {})
+    return _db_cache
+
+
+def _save_db() -> None:
+    """Guarda el cache en el JSON"""
+    if _db_cache is None:
+        return
+
+    data = {"collections": _db_cache}
+    with open(PLANT_DB_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 
 def get_document(collection_name: str, document_id: str) -> dict[str, Any]:
-    db = get_firestore_client()
-    snapshot = db.collection(collection_name).document(document_id).get()
+    """Obtiene un documento por ID"""
+    db = _load_db()
 
-    if not snapshot.exists:
+    if collection_name not in db:
         raise HTTPException(
             status_code=404,
-            detail=f"No se encontro el documento '{document_id}' en '{collection_name}'.",
+            detail=f"Colección '{collection_name}' no encontrada.",
         )
 
-    return _serialize_document(snapshot)
+    collection = db[collection_name]
+    doc = next((d for d in collection if d.get("id") == document_id), None)
+
+    if doc is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró el documento '{document_id}' en '{collection_name}'.",
+        )
+
+    return doc
 
 
 def get_collection(
@@ -49,33 +64,62 @@ def get_collection(
     filters: list[tuple[str, str, Any]] | None = None,
     order_by: str | None = None,
 ) -> list[dict[str, Any]]:
-    db = get_firestore_client()
-    query = db.collection(collection_name)
+    """Obtiene una colección completa con filtros opcionales"""
+    db = _load_db()
 
-    for field_name, operator, value in filters or []:
-        query = query.where(field_name, operator, value)
+    if collection_name not in db:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Colección '{collection_name}' no encontrada.",
+        )
 
+    collection = db[collection_name]
+
+    # Aplicar filtros (solo soportamos operador "==")
+    if filters:
+        for field_name, operator, value in filters:
+            if operator == "==":
+                collection = [d for d in collection if d.get(field_name) == value]
+            else:
+                raise ValueError(f"Operador '{operator}' no soportado. Solo se soporta '=='")
+
+    # Ordenar si se especifica
     if order_by:
-        query = query.order_by(order_by)
+        collection = sorted(collection, key=lambda d: d.get(order_by, ""))
 
-    return [_serialize_document(document) for document in query.stream()]
+    return collection
 
 
 def update_document(
     collection_name: str, document_id: str, data: dict[str, Any]
 ) -> dict[str, Any]:
-    db = get_firestore_client()
-    doc_ref = db.collection(collection_name).document(document_id)
-    snapshot = doc_ref.get()
+    """Actualiza un documento y guarda los cambios"""
+    db = _load_db()
 
-    if not snapshot.exists:
+    if collection_name not in db:
         raise HTTPException(
             status_code=404,
-            detail=f"No se encontro el documento '{document_id}' en '{collection_name}'.",
+            detail=f"Colección '{collection_name}' no encontrada.",
         )
 
-    data["updatedAt"] = firestore.SERVER_TIMESTAMP
-    doc_ref.update(data)
+    collection = db[collection_name]
+    doc_index = next((i for i, d in enumerate(collection) if d.get("id") == document_id), None)
 
-    updated = doc_ref.get()
-    return _serialize_document(updated)
+    if doc_index is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró el documento '{document_id}' en '{collection_name}'.",
+        )
+
+    # Actualizar documento
+    doc = collection[doc_index]
+    data["updatedAt"] = __import__("datetime").datetime.now(
+        __import__("datetime").timezone.utc
+    ).isoformat()
+    doc.update(data)
+    collection[doc_index] = doc
+
+    # Guardar a disco
+    _save_db()
+
+    return doc
