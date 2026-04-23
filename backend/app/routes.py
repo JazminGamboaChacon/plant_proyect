@@ -19,6 +19,11 @@ from .services import get_collection, get_document, update_document
 router = APIRouter()
 
 
+@router.get("/")
+def root() -> dict:
+    return {"name": "Plant Project API", "version": "1.0.0", "docs": "/docs"}
+
+
 @router.get("/health")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
