@@ -78,6 +78,25 @@ class UserProfileResponse(BaseModel):
     achievements: list[AchievementWithEarned]
 
 
+class UserUpdateModel(BaseModel):
+    username: str | None = None
+    fullName: str | None = None
+    birthday: str | None = None
+    photoURL: str | None = None
+    isPublicProfile: bool | None = None
+    favoritePlantTypes: list[str] | None = None
+
+
+class PlantUpdateModel(BaseModel):
+    commonName: str | None = None
+    scientificName: str | None = None
+    photoURL: str | None = None
+    type: str | None = None
+    groupId: str | None = None
+    isFavorite: bool | None = None
+    notes: str | None = None
+
+
 class ApiCollectionResponse(BaseModel):
     collection: str
     count: int

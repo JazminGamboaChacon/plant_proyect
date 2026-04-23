@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from fastapi import HTTPException
+
 from .models import (
     AchievementModel,
     AchievementWithEarned,
@@ -7,10 +9,12 @@ from .models import (
     GroupModel,
     PlantModel,
     PlantTypeModel,
+    PlantUpdateModel,
     UserModel,
     UserProfileResponse,
+    UserUpdateModel,
 )
-from .services import get_collection, get_document
+from .services import get_collection, get_document, update_document
 
 router = APIRouter()
 
@@ -20,7 +24,7 @@ def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.get("/api/users/{user_id}", response_model=UserModel)
+@router.get("/api/users/{user_id}")
 def read_user(user_id: str) -> dict:
     return get_document("users", user_id)
 
@@ -82,6 +86,22 @@ def read_user_achievements(user_id: str) -> list[dict]:
 @router.get("/api/plant-types", response_model=list[PlantTypeModel])
 def read_plant_types() -> list[dict]:
     return get_collection("plantTypes")
+
+
+@router.put("/api/users/{user_id}", response_model=UserModel)
+def update_user(user_id: str, payload: UserUpdateModel) -> dict:
+    data = payload.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(status_code=400, detail="No fields to update.")
+    return update_document("users", user_id, data)
+
+
+@router.put("/api/plants/{plant_id}", response_model=PlantModel)
+def update_plant(plant_id: str, payload: PlantUpdateModel) -> dict:
+    data = payload.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(status_code=400, detail="No fields to update.")
+    return update_document("plants", plant_id, data)
 
 
 @router.get("/api/collections/{collection_name}", response_model=ApiCollectionResponse)
