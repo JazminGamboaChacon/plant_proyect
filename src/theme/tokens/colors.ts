@@ -12,6 +12,10 @@ export const lightColors: ThemeColors = {
   primarySoft: "#E9F1E8",
   peach: "#E9D4BC",
   teal: "#A0DEBC",
+  error: "#D32F2F",
+  errorLight: "#FFEBEE",
+  success: "#2E7D32",
+  successLight: "#E8F5E9",
 };
 
 export const darkColors: ThemeColors = {
@@ -26,4 +30,8 @@ export const darkColors: ThemeColors = {
   primarySoft: "#162B1C",
   peach: "#C4916B",
   teal: "#5DB88A",
+  error: "#EF5350",
+  errorLight: "#4E1A1A",
+  success: "#66BB6A",
+  successLight: "#1A3E1E",
 };

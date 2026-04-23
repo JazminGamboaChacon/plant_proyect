@@ -12,6 +12,10 @@ export interface ThemeColors {
   primarySoft: string;
   peach: string;
   teal: string;
+  error: string;
+  errorLight: string;
+  success: string;
+  successLight: string;
 }
 
 export interface ThemeSpacing {

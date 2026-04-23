@@ -21,10 +21,20 @@ export type NavItem = {
 };
 
 export type FavoritePlant = {
+  id: string;
   name: string;
   family: string;
   since: string;
   imageUrl: string;
+};
+
+export type PlantSummary = {
+  id: string;
+  commonName: string;
+  scientificName: string;
+  type: string;
+  isFavorite: boolean;
+  photoURL: string | null;
 };
 
 export type PlantOfTheDay = {
@@ -41,9 +51,10 @@ export type UserProfileData = {
   streak: number;
   friends: number;
   plants: number;
-  favoritePlant: FavoritePlant;
+  favoritePlant: FavoritePlant | null;
   categories: Category[];
   achievements: Achievement[];
   profileCompletion: number;
-  plantOfTheDay: PlantOfTheDay;
+  plantOfTheDay: PlantOfTheDay | null;
+  plantsList: PlantSummary[];
 };
