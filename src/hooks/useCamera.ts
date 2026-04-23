@@ -33,7 +33,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const cameraRef = useRef<CameraView>(null);
 
   const [permissions, setPermissions] = useState<AppPermissions | null>(null);
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(requestOnMount);
   const [facing, setFacing] = useState<CameraType>('back');
   const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [lastPhoto, setLastPhoto] = useState<PhotoResult | null>(null);
@@ -41,8 +41,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
 
   const isPermissionGranted =
     !!permissions &&
-    PermissionService.isGranted(permissions.camera) &&
-    PermissionService.isGranted(permissions.mediaLibrary);
+    PermissionService.isGranted(permissions.camera);
 
   const requestPermissions = useCallback(async () => {
     setIsLoadingPermissions(true);
@@ -51,7 +50,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       const result = await PermissionService.requestAllPermissions();
       setPermissions(result);
     } catch (err) {
-      setError('Error al solicitar permisos');
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoadingPermissions(false);
     }
