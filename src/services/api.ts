@@ -155,3 +155,4 @@ export type PlantCreatePayload = {
 export function createPlant(data: PlantCreatePayload): Promise<ApiPlant> {
   return apiMutate("/api/plants", "POST", data);
 }
+
