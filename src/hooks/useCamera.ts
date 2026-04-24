@@ -16,6 +16,8 @@ interface UseCameraReturn {
   permissions: AppPermissions | null;
   isPermissionGranted: boolean;
   isLoadingPermissions: boolean;
+  cameraCanAskAgain: boolean;
+  mediaLibraryCanAskAgain: boolean;
   facing: CameraType;
   flashMode: FlashMode;
   requestPermissions: () => Promise<void>;
@@ -42,6 +44,12 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const isPermissionGranted =
     !!permissions &&
     PermissionService.isGranted(permissions.camera);
+
+  const cameraCanAskAgain =
+    permissions !== null && PermissionService.canAskAgain(permissions.camera);
+
+  const mediaLibraryCanAskAgain =
+    permissions !== null && PermissionService.canAskAgain(permissions.mediaLibrary);
 
   const requestPermissions = useCallback(async () => {
     setIsLoadingPermissions(true);
@@ -106,6 +114,8 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     permissions,
     isPermissionGranted,
     isLoadingPermissions,
+    cameraCanAskAgain,
+    mediaLibraryCanAskAgain,
     facing,
     flashMode,
     requestPermissions,
