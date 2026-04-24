@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
-import { PlantIdentificationResult } from '../services/geminiService';
+import { PlantIdentificationResult } from '../services/plantIdService';
 
 interface PlantIdentificationModalProps {
   visible: boolean;
@@ -23,7 +23,7 @@ interface PlantIdentificationModalProps {
   onRetake: () => void;
 }
 
-function ConfidenceBadge({ value, textColor }: { value: number; textColor: string }) {
+function ConfidenceBadge({ value }: { value: number }) {
   const bg = value >= 75 ? '#2E7D32' : value >= 50 ? '#F9A825' : '#E65100';
   return (
     <View style={[styles.badge, { backgroundColor: bg }]}>
@@ -131,7 +131,7 @@ export default function PlantIdentificationModal({
             <Text style={[styles.scientificName, { color: t.textSecondary }]}>
               {result.scientificName}
             </Text>
-            <ConfidenceBadge value={result.confidence} textColor={t.textPrimary} />
+            <ConfidenceBadge value={result.confidence} />
 
             <View style={styles.careRow}>
               <CareCard
