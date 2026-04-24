@@ -36,6 +36,19 @@ function ConfidenceBadge({ value }: { value: number }) {
   );
 }
 
+function ToxicityBadge({ value }: { value: string }) {
+  if (!value || value === 'No disponible') return null;
+  const lower = value.toLowerCase();
+  const isToxic = !lower.includes('non-toxic') && !lower.includes('no tóxic') && !lower.includes('not toxic') && (lower.includes('toxic') || lower.includes('tóxic') || lower.includes('poison'));
+  const bg = isToxic ? '#C62828' : '#2E7D32';
+  const label = isToxic ? 'Tóxica' : 'No tóxica';
+  return (
+    <View style={[styles.badge, { backgroundColor: bg }]}>
+      <Text style={[styles.badgeText, { color: '#fff' }]}>{label}</Text>
+    </View>
+  );
+}
+
 function CareCard({
   icon,
   label,
@@ -141,7 +154,16 @@ export default function PlantIdentificationModal({
             <Text style={[styles.scientificName, { color: t.textSecondary }]}>
               {result.scientificName}
             </Text>
-            <ConfidenceBadge value={result.confidence} />
+            {result.family !== 'No disponible' && (
+              <Text style={[styles.familyText, { color: t.textSecondary }]}>
+                Familia: {result.family}
+              </Text>
+            )}
+
+            <View style={styles.badgeRow}>
+              <ConfidenceBadge value={result.confidence} />
+              <ToxicityBadge value={result.toxicity} />
+            </View>
 
             <View style={styles.careRow}>
               <CareCard
@@ -170,6 +192,17 @@ export default function PlantIdentificationModal({
               />
             </View>
 
+            {result.description !== 'No disponible' && (
+              <View style={[styles.descriptionBox, { backgroundColor: t.background }]}>
+                <Text style={[styles.descriptionLabel, { color: t.textSecondary }]}>
+                  Descripción
+                </Text>
+                <Text style={[styles.descriptionText, { color: t.textPrimary }]}>
+                  {result.description}
+                </Text>
+              </View>
+            )}
+
             <View style={styles.actionRow}>
               <TouchableOpacity
                 style={[styles.btn, styles.btnSecondary, { borderColor: t.border }]}
@@ -181,7 +214,7 @@ export default function PlantIdentificationModal({
                 style={[styles.btn, { backgroundColor: t.primary }]}
                 onPress={() => onSave(result)}
               >
-                <Text style={styles.btnText}>Guardar Planta</Text>
+                <Text style={styles.btnText}>Agregar a colección</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -248,10 +281,35 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  familyText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    marginTop: -4,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
   careRow: {
     flexDirection: 'row',
     gap: 8,
     marginTop: 8,
+  },
+  descriptionBox: {
+    borderRadius: 10,
+    padding: 12,
+    gap: 4,
+    marginTop: 4,
+  },
+  descriptionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  descriptionText: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   careCard: {
     flex: 1,
