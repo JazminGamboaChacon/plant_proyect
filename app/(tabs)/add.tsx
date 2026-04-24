@@ -38,6 +38,7 @@ export default function AddScreen() {
   } = useCamera({ requestOnMount: true });
 
   const [capturedPhoto, setCapturedPhoto] = useState<PhotoResult | null>(null);
+  const [capturedBase64, setCapturedBase64] = useState<string | undefined>(undefined);
   const [identificationResult, setIdentificationResult] =
     useState<PlantIdentificationResult | null>(null);
   const [isIdentifying, setIsIdentifying] = useState(false);
@@ -48,12 +49,13 @@ export default function AddScreen() {
     const photo = await takePhoto({ quality: 0.8 });
     if (!photo) return;
     setCapturedPhoto(photo);
+    setCapturedBase64(photo.base64);
     setIdentificationResult(null);
     setIdentificationError(null);
     setShowModal(true);
     setIsIdentifying(true);
     try {
-      const result = await identifyPlant(photo.uri);
+      const result = await identifyPlant(photo.uri, photo.base64);
       setIdentificationResult(result);
     } catch (err) {
       setIdentificationError(
@@ -67,6 +69,7 @@ export default function AddScreen() {
   const handleRetake = () => {
     setShowModal(false);
     setCapturedPhoto(null);
+    setCapturedBase64(undefined);
     setIdentificationResult(null);
     setIdentificationError(null);
   };
@@ -132,6 +135,7 @@ export default function AddScreen() {
       <PlantIdentificationModal
         visible={showModal}
         photoUri={capturedPhoto?.uri ?? null}
+        photoBase64={capturedBase64}
         result={identificationResult}
         isLoading={isIdentifying}
         error={identificationError}
