@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   Modal,
   ScrollView,
@@ -9,6 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+const PHOTO_HEIGHT = Dimensions.get('window').height * 0.4;
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { PlantIdentificationResult } from '../services/plantIdService';
@@ -16,6 +19,7 @@ import { PlantIdentificationResult } from '../services/plantIdService';
 interface PlantIdentificationModalProps {
   visible: boolean;
   photoUri: string | null;
+  photoBase64?: string;
   result: PlantIdentificationResult | null;
   isLoading: boolean;
   error: string | null;
@@ -59,6 +63,7 @@ function CareCard({
 export default function PlantIdentificationModal({
   visible,
   photoUri,
+  photoBase64,
   result,
   isLoading,
   error,
@@ -71,14 +76,25 @@ export default function PlantIdentificationModal({
   return (
     <Modal visible={visible} animationType="slide" statusBarTranslucent>
       <SafeAreaView style={[styles.container, { backgroundColor: t.background }]}>
-        {/* Photo preview */}
-        {photoUri && (
-          <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="cover" />
+
+        {/* Foto siempre visible arriba */}
+        {photoUri || photoBase64 ? (
+          <Image
+            source={{
+              uri: photoBase64
+                ? `data:image/jpeg;base64,${photoBase64}`
+                : photoUri!,
+            }}
+            style={styles.photo}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={[styles.photo, { backgroundColor: t.border }]} />
         )}
 
-        {/* Loading */}
+        {/* Contenido dinámico abajo */}
         {isLoading && (
-          <View style={[styles.overlay, { backgroundColor: t.background }]}>
+          <View style={[styles.bottom, { backgroundColor: t.background }]}>
             <ActivityIndicator size="large" color={t.primary} />
             <Text style={[styles.loadingText, { color: t.textSecondary }]}>
               Identificando planta…
@@ -86,9 +102,8 @@ export default function PlantIdentificationModal({
           </View>
         )}
 
-        {/* Error */}
         {!isLoading && error && (
-          <View style={[styles.overlay, { backgroundColor: t.background }]}>
+          <View style={[styles.bottom, { backgroundColor: t.background }]}>
             <Feather name="alert-circle" size={48} color={t.error} />
             <Text style={[styles.errorText, { color: t.error }]}>{error}</Text>
             <TouchableOpacity
@@ -100,9 +115,8 @@ export default function PlantIdentificationModal({
           </View>
         )}
 
-        {/* Not a plant */}
         {!isLoading && !error && result && !result.isPlant && (
-          <View style={[styles.overlay, { backgroundColor: t.background }]}>
+          <View style={[styles.bottom, { backgroundColor: t.background }]}>
             <Feather name="x-circle" size={48} color={t.textSecondary} />
             <Text style={[styles.errorText, { color: t.textPrimary }]}>
               No se detectó una planta en la imagen.
@@ -116,14 +130,10 @@ export default function PlantIdentificationModal({
           </View>
         )}
 
-        {/* Success */}
         {!isLoading && !error && result && result.isPlant && (
           <ScrollView
             style={styles.resultSheet}
-            contentContainerStyle={[
-              styles.resultContent,
-              { backgroundColor: t.surface },
-            ]}
+            contentContainerStyle={[styles.resultContent, { backgroundColor: t.surface }]}
           >
             <Text style={[styles.commonName, { color: t.textPrimary }]}>
               {result.commonName}
@@ -176,6 +186,7 @@ export default function PlantIdentificationModal({
             </View>
           </ScrollView>
         )}
+
       </SafeAreaView>
     </Modal>
   );
@@ -187,9 +198,16 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    height: '45%',
+    height: PHOTO_HEIGHT,
   },
   overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    padding: 24,
+  },
+  bottom: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
