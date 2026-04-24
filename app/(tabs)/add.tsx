@@ -18,7 +18,7 @@ import { PhotoResult } from "../../src/services/cameraService";
 import {
   identifyPlant,
   PlantIdentificationResult,
-} from "../../src/services/geminiService";
+} from "../../src/services/plantIdService";
 
 export default function AddScreen() {
   const { theme } = useTheme();
