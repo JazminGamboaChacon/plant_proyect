@@ -101,3 +101,14 @@ class ApiCollectionResponse(BaseModel):
     collection: str
     count: int
     items: list[dict]
+
+
+class PlantCreateModel(BaseModel):
+    userId: str
+    commonName: str
+    scientificName: str
+    photoURL: str | None = None
+    type: str = "unknown"
+    groupId: str = ""
+    isFavorite: bool = False
+    notes: str = ""
