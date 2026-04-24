@@ -112,3 +112,5 @@ class PlantCreateModel(BaseModel):
     groupId: str = ""
     isFavorite: bool = False
     notes: str = ""
+
+
