@@ -14,7 +14,7 @@ export async function syncPendingPlants(
         userId,
         commonName: plant.commonName,
         scientificName: plant.scientificName,
-        photoURL: plant.photoURL,
+        photoURL: null,
         type: plant.type || 'unknown',
         groupId: plant.groupId || '',
         isFavorite: plant.isFavorite,
