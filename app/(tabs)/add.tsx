@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
 import * as FileSystem from "expo-file-system/legacy";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import {
@@ -74,6 +75,39 @@ export default function AddScreen() {
     }
   };
 
+  const handleGalleryPick = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      quality: 0.8,
+      base64: true,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const uri = asset.uri;
+    let base64 = asset.base64 ?? undefined;
+    if (!base64) {
+      base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    }
+    setCapturedPhoto({ uri, base64: base64 ?? undefined, width: asset.width, height: asset.height });
+    setCapturedBase64(base64);
+    setIdentificationResult(null);
+    setIdentificationError(null);
+    setShowModal(true);
+    setIsIdentifying(true);
+    try {
+      const res = await identifyPlant(uri, base64);
+      setIdentificationResult(res);
+    } catch (err) {
+      setIdentificationError(
+        err instanceof Error ? err.message : "Error al identificar la planta"
+      );
+    } finally {
+      setIsIdentifying(false);
+    }
+  };
+
   const handleRetake = () => {
     setShowModal(false);
     setCapturedPhoto(null);
@@ -95,6 +129,9 @@ export default function AddScreen() {
         isFavorite: false,
         notes: `Riego: ${result.watering}\nLuz: ${result.sunlight}\nSustrato: ${result.soil}`,
         confidence: result.confidence,
+        family: result.family,
+        description: result.description,
+        toxicity: result.toxicity,
         watering: result.watering,
         sunlight: result.sunlight,
         soil: result.soil,
@@ -167,7 +204,9 @@ export default function AddScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.bottomControls}>
-            <View style={styles.sideSlot} />
+            <TouchableOpacity onPress={handleGalleryPick} style={styles.sideSlot}>
+              <Feather name="image" size={24} color="#fff" />
+            </TouchableOpacity>
             <TouchableOpacity onPress={handleCapture} style={styles.captureBtn} />
             <TouchableOpacity onPress={toggleFacing} style={styles.sideSlot}>
               <Feather name="refresh-cw" size={24} color="#fff" />
