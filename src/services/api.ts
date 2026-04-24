@@ -1,7 +1,9 @@
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
+console.log("[API] BASE URL:", API_BASE);
 
 async function apiFetch<T>(path: string): Promise<T> {
   if (!API_BASE) throw new Error("EXPO_PUBLIC_API_URL no definida en .env");
+  console.log("[API] fetch:", `${API_BASE}${path}`);
   const res = await fetch(`${API_BASE}${path}`);
   if (!res.ok) {
     throw new Error(`API error ${res.status}: ${path}`);
