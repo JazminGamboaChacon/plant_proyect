@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
+import * as FileSystem from "expo-file-system/legacy";
 import { useState } from "react";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import {
@@ -49,13 +50,20 @@ export default function AddScreen() {
     const photo = await takePhoto({ quality: 0.8 });
     if (!photo) return;
     setCapturedPhoto(photo);
-    setCapturedBase64(photo.base64);
+    // Android emulator may not populate base64 even with base64:true — read from file as fallback
+    let base64 = photo.base64;
+    if (!base64) {
+      base64 = await FileSystem.readAsStringAsync(photo.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    }
+    setCapturedBase64(base64);
     setIdentificationResult(null);
     setIdentificationError(null);
     setShowModal(true);
     setIsIdentifying(true);
     try {
-      const result = await identifyPlant(photo.uri, photo.base64);
+      const result = await identifyPlant(photo.uri, base64);
       setIdentificationResult(result);
     } catch (err) {
       setIdentificationError(
