@@ -11,6 +11,9 @@ export interface LocalPlant {
   isFavorite: boolean;
   notes: string;
   confidence: number;
+  family: string;
+  description: string;
+  toxicity: string;
   watering: string;
   sunlight: string;
   soil: string;
