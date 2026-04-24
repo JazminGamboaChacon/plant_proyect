@@ -1,61 +1,25 @@
-import json
-from pathlib import Path
+from uuid import uuid4
+from datetime import datetime, timezone
 from typing import Any
+
 from fastapi import HTTPException
 
-# Ruta al archivo de datos
-PLANT_DB_PATH = Path(__file__).parent.parent / "migracionFirebase" / "plantDB.json"
-
-# Cache en memoria
-_db_cache: dict[str, Any] | None = None
+from .firebase import get_firestore_client
 
 
-def _load_db() -> dict[str, list[dict[str, Any]]]:
-    """Carga el JSON en memoria"""
-    global _db_cache
-    if _db_cache is not None:
-        return _db_cache
-
-    if not PLANT_DB_PATH.exists():
-        raise FileNotFoundError(f"No se encontró la base de datos: {PLANT_DB_PATH}")
-
-    with open(PLANT_DB_PATH, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    _db_cache = data.get("collections", {})
-    return _db_cache
-
-
-def _save_db() -> None:
-    """Guarda el cache en el JSON"""
-    if _db_cache is None:
-        return
-
-    data = {"collections": _db_cache}
-    with open(PLANT_DB_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+def _doc_to_dict(doc) -> dict[str, Any]:
+    return {"id": doc.id, **doc.to_dict()}
 
 
 def get_document(collection_name: str, document_id: str) -> dict[str, Any]:
-    """Obtiene un documento por ID"""
-    db = _load_db()
-
-    if collection_name not in db:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Colección '{collection_name}' no encontrada.",
-        )
-
-    collection = db[collection_name]
-    doc = next((d for d in collection if d.get("id") == document_id), None)
-
-    if doc is None:
+    db = get_firestore_client()
+    doc = db.collection(collection_name).document(document_id).get()
+    if not doc.exists:
         raise HTTPException(
             status_code=404,
             detail=f"No se encontró el documento '{document_id}' en '{collection_name}'.",
         )
-
-    return doc
+    return _doc_to_dict(doc)
 
 
 def get_collection(
@@ -64,62 +28,34 @@ def get_collection(
     filters: list[tuple[str, str, Any]] | None = None,
     order_by: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Obtiene una colección completa con filtros opcionales"""
-    db = _load_db()
-
-    if collection_name not in db:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Colección '{collection_name}' no encontrada.",
-        )
-
-    collection = db[collection_name]
-
-    # Aplicar filtros (solo soportamos operador "==")
+    db = get_firestore_client()
+    query = db.collection(collection_name)
     if filters:
-        for field_name, operator, value in filters:
-            if operator == "==":
-                collection = [d for d in collection if d.get(field_name) == value]
-            else:
-                raise ValueError(f"Operador '{operator}' no soportado. Solo se soporta '=='")
-
-    # Ordenar si se especifica
+        for field, op, value in filters:
+            query = query.where(field, op, value)
     if order_by:
-        collection = sorted(collection, key=lambda d: d.get(order_by, ""))
-
-    return collection
+        query = query.order_by(order_by)
+    return [_doc_to_dict(doc) for doc in query.stream()]
 
 
 def update_document(
     collection_name: str, document_id: str, data: dict[str, Any]
 ) -> dict[str, Any]:
-    """Actualiza un documento y guarda los cambios"""
-    db = _load_db()
-
-    if collection_name not in db:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Colección '{collection_name}' no encontrada.",
-        )
-
-    collection = db[collection_name]
-    doc_index = next((i for i, d in enumerate(collection) if d.get("id") == document_id), None)
-
-    if doc_index is None:
+    db = get_firestore_client()
+    ref = db.collection(collection_name).document(document_id)
+    if not ref.get().exists:
         raise HTTPException(
             status_code=404,
             detail=f"No se encontró el documento '{document_id}' en '{collection_name}'.",
         )
+    data["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    ref.update(data)
+    return _doc_to_dict(ref.get())
 
-    # Actualizar documento
-    doc = collection[doc_index]
-    data["updatedAt"] = __import__("datetime").datetime.now(
-        __import__("datetime").timezone.utc
-    ).isoformat()
-    doc.update(data)
-    collection[doc_index] = doc
 
-    # Guardar a disco
-    _save_db()
-
-    return doc
+def create_document(collection_name: str, data: dict[str, Any]) -> dict[str, Any]:
+    db = get_firestore_client()
+    doc_id = data.pop("id", str(uuid4()))
+    data.setdefault("createdAt", datetime.now(timezone.utc).isoformat())
+    db.collection(collection_name).document(doc_id).set(data)
+    return {"id": doc_id, **data}
