@@ -5,12 +5,15 @@ export interface PlantIdentificationResult {
   commonName: string;
   scientificName: string;
   confidence: number;   // 0–100
+  family: string;
+  description: string;
+  toxicity: string;
   watering: string;
   sunlight: string;
   soil: string;
 }
 
-const DETAILS = 'common_names,watering,best_light_condition,best_soil_type';
+const DETAILS = 'common_names,watering,best_light_condition,best_soil_type,taxonomy,description,toxicity';
 
 function formatWatering(watering: unknown): string {
   if (!watering) return 'No disponible';
@@ -74,6 +77,9 @@ export async function identifyPlant(
       commonName: '',
       scientificName: '',
       confidence: Math.round(isPlantProbability * 100),
+      family: '',
+      description: '',
+      toxicity: '',
       watering: '',
       sunlight: '',
       soil: '',
@@ -90,6 +96,9 @@ export async function identifyPlant(
     commonName: commonNames[0] ?? top.name,
     scientificName: top.name ?? '',
     confidence: Math.round((top.probability ?? 0) * 100),
+    family: details.taxonomy?.family ?? 'No disponible',
+    description: details.description?.value ?? 'No disponible',
+    toxicity: typeof details.toxicity === 'string' ? details.toxicity : 'No disponible',
     watering: formatWatering(details.watering),
     sunlight: details.best_light_condition ?? 'No disponible',
     soil: details.best_soil_type ?? 'No disponible',
