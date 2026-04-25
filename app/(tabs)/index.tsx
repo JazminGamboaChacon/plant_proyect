@@ -1,11 +1,12 @@
 import { Feather } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import {
   FlatList,
   Image,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,7 +36,11 @@ function PlantCard({ plant }: { plant: LocalPlant }) {
   const t = theme.colors;
 
   return (
-    <View style={[styles.card, { backgroundColor: t.surface, borderColor: t.border }]}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: t.surface, borderColor: t.border }]}
+      onPress={() => router.push(`/plant-detail?localId=${plant.localId}`)}
+      activeOpacity={0.75}
+    >
       {plant.localPhotoUri ? (
         <Image source={{ uri: plant.localPhotoUri }} style={styles.cardPhoto} resizeMode="cover" />
       ) : (
@@ -62,7 +67,7 @@ function PlantCard({ plant }: { plant: LocalPlant }) {
           <ToxicityBadge value={plant.toxicity} />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
