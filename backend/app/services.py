@@ -7,8 +7,27 @@ from fastapi import HTTPException
 from .firebase import get_firestore_client
 
 
+def _convert_timestamps(data: dict[str, Any]) -> dict[str, Any]:
+    result = {}
+    for k, v in data.items():
+        if isinstance(v, datetime):
+            result[k] = v.isoformat()
+        elif isinstance(v, dict):
+            result[k] = _convert_timestamps(v)
+        elif isinstance(v, list):
+            result[k] = [
+                _convert_timestamps(item) if isinstance(item, dict)
+                else item.isoformat() if isinstance(item, datetime)
+                else item
+                for item in v
+            ]
+        else:
+            result[k] = v
+    return result
+
+
 def _doc_to_dict(doc) -> dict[str, Any]:
-    return {"id": doc.id, **doc.to_dict()}
+    return {"id": doc.id, **_convert_timestamps(doc.to_dict())}
 
 
 def get_document(collection_name: str, document_id: str) -> dict[str, Any]:
