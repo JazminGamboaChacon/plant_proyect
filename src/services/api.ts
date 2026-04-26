@@ -140,3 +140,19 @@ export function fetchUserPlants(userId: string): Promise<ApiPlant[]> {
 export function fetchPlantTypes(): Promise<ApiPlantType[]> {
   return apiFetch("/api/plant-types");
 }
+
+export type PlantCreatePayload = {
+  userId: string;
+  commonName: string;
+  scientificName: string;
+  photoURL?: string | null;
+  type: string;
+  groupId: string;
+  isFavorite?: boolean;
+  notes?: string;
+};
+
+export function createPlant(data: PlantCreatePayload): Promise<ApiPlant> {
+  return apiMutate("/api/plants", "POST", data);
+}
+

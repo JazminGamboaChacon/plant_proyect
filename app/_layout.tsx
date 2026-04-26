@@ -6,6 +6,7 @@ import {
 } from "@expo-google-fonts/inter";
 import { Lora_400Regular_Italic } from "@expo-google-fonts/lora";
 import { Stack } from "expo-router";
+import { SyncProvider } from "../src/context/SyncContext";
 import { ThemeProvider } from "../src/context/ThemeContext";
 import { ToastProvider } from "../src/context/ToastContext";
 
@@ -22,6 +23,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <ToastProvider>
+        <SyncProvider userId="user-1">
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="register" options={{ headerShown: false }} />
@@ -30,7 +32,9 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
           <Stack.Screen name="edit-plant" options={{ headerShown: false }} />
+          <Stack.Screen name="plant-detail" options={{ headerShown: false }} />
         </Stack>
+        </SyncProvider>
       </ToastProvider>
     </ThemeProvider>
   );
