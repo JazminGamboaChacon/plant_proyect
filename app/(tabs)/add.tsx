@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
+import * as FileSystem from "expo-file-system/legacy";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
+import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import {
   ActivityIndicator,
-  Image,
   Linking,
   StyleSheet,
   Text,
@@ -11,39 +13,134 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import PlantIdentificationModal from "../../src/componets/PlantIdentificationModal";
 import { useTheme } from "../../src/context/ThemeContext";
 import { useCamera } from "../../src/hooks/useCamera";
 import { PhotoResult } from "../../src/services/cameraService";
+import {
+  identifyPlant,
+  PlantIdentificationResult,
+} from "../../src/services/plantIdService";
 
 export default function AddScreen() {
   const { theme } = useTheme();
+  const { savePlant } = usePlantStorage("user-1");
   const {
     cameraRef,
     permissions,
     isPermissionGranted,
     isLoadingPermissions,
-    error,
+    cameraCanAskAgain,
     facing,
     flashMode,
     requestPermissions,
     takePhoto,
     toggleFacing,
     toggleFlash,
-    saveToGallery,
   } = useCamera({ requestOnMount: true });
 
   const [capturedPhoto, setCapturedPhoto] = useState<PhotoResult | null>(null);
+  const [capturedBase64, setCapturedBase64] = useState<string | undefined>(undefined);
+  const [identificationResult, setIdentificationResult] =
+    useState<PlantIdentificationResult | null>(null);
+  const [isIdentifying, setIsIdentifying] = useState(false);
+  const [identificationError, setIdentificationError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const handleCapture = async () => {
     const photo = await takePhoto({ quality: 0.8 });
-    if (photo) setCapturedPhoto(photo);
+    if (!photo) return;
+    setCapturedPhoto(photo);
+    // Android emulator may not populate base64 even with base64:true — read from file as fallback
+    let base64 = photo.base64;
+    if (!base64) {
+      base64 = await FileSystem.readAsStringAsync(photo.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    }
+    setCapturedBase64(base64);
+    setIdentificationResult(null);
+    setIdentificationError(null);
+    setShowModal(true);
+    setIsIdentifying(true);
+    try {
+      const result = await identifyPlant(photo.uri, base64);
+      setIdentificationResult(result);
+    } catch (err) {
+      setIdentificationError(
+        err instanceof Error ? err.message : "Error al identificar la planta"
+      );
+    } finally {
+      setIsIdentifying(false);
+    }
   };
 
-  const handleSave = async () => {
-    if (capturedPhoto) {
-      await saveToGallery(capturedPhoto.uri);
-      setCapturedPhoto(null);
+  const handleGalleryPick = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      quality: 0.8,
+      base64: true,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    const uri = asset.uri;
+    let base64 = asset.base64 ?? undefined;
+    if (!base64) {
+      base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
     }
+    setCapturedPhoto({ uri, base64: base64 ?? undefined, width: asset.width, height: asset.height });
+    setCapturedBase64(base64);
+    setIdentificationResult(null);
+    setIdentificationError(null);
+    setShowModal(true);
+    setIsIdentifying(true);
+    try {
+      const res = await identifyPlant(uri, base64);
+      setIdentificationResult(res);
+    } catch (err) {
+      setIdentificationError(
+        err instanceof Error ? err.message : "Error al identificar la planta"
+      );
+    } finally {
+      setIsIdentifying(false);
+    }
+  };
+
+  const handleRetake = () => {
+    setShowModal(false);
+    setCapturedPhoto(null);
+    setCapturedBase64(undefined);
+    setIdentificationResult(null);
+    setIdentificationError(null);
+  };
+
+  const handleSavePlant = async (result: PlantIdentificationResult) => {
+    if (!capturedPhoto) return;
+    await savePlant(
+      {
+        userId: "user-1",
+        commonName: result.commonName || "Planta desconocida",
+        scientificName: result.scientificName || "",
+        photoURL: null,
+        type: "unknown",
+        groupId: "",
+        isFavorite: false,
+        notes: `Riego: ${result.watering}\nLuz: ${result.sunlight}\nSustrato: ${result.soil}`,
+        confidence: result.confidence,
+        family: result.family,
+        description: result.description,
+        toxicity: result.toxicity,
+        watering: result.watering,
+        sunlight: result.sunlight,
+        soil: result.soil,
+        createdAt: new Date().toISOString(),
+      },
+      capturedPhoto.uri
+    );
+    setShowModal(false);
+    setCapturedPhoto(null);
   };
 
   if (isLoadingPermissions) {
@@ -55,58 +152,41 @@ export default function AddScreen() {
   }
 
   if (!isPermissionGranted) {
-    const isDenied = permissions?.camera === "denied" || permissions?.mediaLibrary === "denied";
+    const permanentlyDenied =
+      permissions?.camera.status === "denied" && !cameraCanAskAgain;
+
     return (
       <View style={[styles.centered, { backgroundColor: theme.colors.background }]}>
-        <Text style={{ color: "red", fontSize: 11, marginBottom: 8 }}>
-          cam: {permissions?.camera ?? "null"} | media: {permissions?.mediaLibrary ?? "null"} | err: {error ?? "none"}
-        </Text>
         <Feather name="camera-off" size={48} color={theme.colors.textSecondary} />
         <Text style={[styles.permissionText, { color: theme.colors.textPrimary }]}>
-          {isDenied
-            ? "Permiso denegado. Actívalo manualmente en Configuración."
-            : "Se necesita permiso de cámara y galería."}
+          {permanentlyDenied
+            ? "Permiso de cámara denegado permanentemente. Actívalo en Configuración."
+            : "Se necesita permiso de cámara y galería para escanear plantas."}
         </Text>
         <TouchableOpacity
           style={[styles.permissionBtn, { backgroundColor: theme.colors.primary }]}
-          onPress={isDenied ? () => Linking.openSettings() : requestPermissions}
+          onPress={permanentlyDenied ? () => Linking.openSettings() : requestPermissions}
         >
           <Text style={styles.permissionBtnText}>
-            {isDenied ? "Abrir Configuración" : "Otorgar permisos"}
+            {permanentlyDenied ? "Abrir Configuración" : "Permitir Cámara"}
           </Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  if (capturedPhoto) {
-    return (
-      <View style={styles.fill}>
-        <Image source={{ uri: capturedPhoto.uri }} style={styles.fill} />
-        <SafeAreaView style={styles.previewOverlay}>
-          <View style={styles.previewButtons}>
-            <TouchableOpacity
-              onPress={() => setCapturedPhoto(null)}
-              style={styles.previewBtn}
-            >
-              <Feather name="x" size={22} color="#fff" />
-              <Text style={styles.previewBtnText}>Retomar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleSave}
-              style={[styles.previewBtn, styles.saveBtn]}
-            >
-              <Feather name="download" size={22} color="#fff" />
-              <Text style={styles.previewBtnText}>Guardar</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.fill}>
+      <PlantIdentificationModal
+        visible={showModal}
+        photoUri={capturedPhoto?.uri ?? null}
+        photoBase64={capturedBase64}
+        result={identificationResult}
+        isLoading={isIdentifying}
+        error={identificationError}
+        onSave={handleSavePlant}
+        onRetake={handleRetake}
+      />
       <CameraView
         ref={cameraRef as React.RefObject<CameraView>}
         style={styles.fill}
@@ -124,7 +204,9 @@ export default function AddScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.bottomControls}>
-            <View style={styles.sideSlot} />
+            <TouchableOpacity onPress={handleGalleryPick} style={styles.sideSlot}>
+              <Feather name="image" size={24} color="#fff" />
+            </TouchableOpacity>
             <TouchableOpacity onPress={handleCapture} style={styles.captureBtn} />
             <TouchableOpacity onPress={toggleFacing} style={styles.sideSlot}>
               <Feather name="refresh-cw" size={24} color="#fff" />
@@ -195,36 +277,5 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: "center",
     alignItems: "center",
-  },
-  previewOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "flex-end",
-  },
-  previewButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingBottom: 32,
-    paddingHorizontal: 32,
-  },
-  previewBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  saveBtn: {
-    backgroundColor: "rgba(56,142,60,0.85)",
-  },
-  previewBtnText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 15,
   },
 });

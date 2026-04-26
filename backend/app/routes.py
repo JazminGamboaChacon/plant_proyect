@@ -7,6 +7,7 @@ from .models import (
     AchievementWithEarned,
     ApiCollectionResponse,
     GroupModel,
+    PlantCreateModel,
     PlantModel,
     PlantTypeModel,
     PlantUpdateModel,
@@ -14,7 +15,7 @@ from .models import (
     UserProfileResponse,
     UserUpdateModel,
 )
-from .services import get_collection, get_document, update_document
+from .services import create_document, get_collection, get_document, update_document
 
 router = APIRouter()
 
@@ -99,6 +100,11 @@ def update_user(user_id: str, payload: UserUpdateModel) -> dict:
     if not data:
         raise HTTPException(status_code=400, detail="No fields to update.")
     return update_document("users", user_id, data)
+
+
+@router.post("/api/plants", response_model=PlantModel, status_code=201)
+def create_plant(payload: PlantCreateModel) -> dict:
+    return create_document("plants", payload.model_dump())
 
 
 @router.put("/api/plants/{plant_id}", response_model=PlantModel)

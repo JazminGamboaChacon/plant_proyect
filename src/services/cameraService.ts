@@ -27,7 +27,7 @@ const CameraService = {
 
     const photo = await cameraRef.current.takePictureAsync({
       quality: options.quality ?? 0.8,
-      base64: options.base64 ?? false,
+      base64: options.base64 ?? true,
       skipProcessing: options.skipProcessing ?? false,
     });
 
