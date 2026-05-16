@@ -113,6 +113,11 @@ export function useUserProfile(userId: string) {
   const [data, setData] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  const refetch = () => {
+    setFetchTrigger((n) => n + 1);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -140,7 +145,7 @@ export function useUserProfile(userId: string) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, fetchTrigger]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 }
