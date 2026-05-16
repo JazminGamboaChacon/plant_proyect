@@ -57,7 +57,6 @@
           "isAccessMediaLocationEnabled": true
         }
       ],
-      "expo-image",
       "expo-web-browser",
       [
         "expo-image-picker",

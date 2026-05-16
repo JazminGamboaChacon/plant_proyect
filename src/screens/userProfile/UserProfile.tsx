@@ -15,7 +15,7 @@ import { createStyles } from "./UserProfile.style";
 const USER_ID = "user-1";
 
 export default function UserProfile() {
-  const { data: user, loading, error } = useUserProfile(USER_ID);
+  const { data: user, loading, error, refetch } = useUserProfile(USER_ID);
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const router = useRouter();
@@ -33,11 +33,22 @@ export default function UserProfile() {
   if (error || !user) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <View style={[styles.container, { justifyContent: "center", alignItems: "center", gap: 16 }]}>
           <Ionicons name="cloud-offline-outline" size={48} color={theme.colors.textSecondary} />
-          <Text style={{ color: theme.colors.textSecondary, marginTop: 12 }}>
+          <Text style={{ color: theme.colors.textSecondary, textAlign: "center", marginHorizontal: 32 }}>
             {error || "Could not load profile"}
           </Text>
+          <TouchableOpacity
+            onPress={refetch}
+            style={{
+              backgroundColor: theme.colors.primary,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: theme.radius.md,
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "600" }}>Reintentar</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
