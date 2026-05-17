@@ -9,6 +9,7 @@ import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
 import CategoryButton from "../../componets/ui/CategoryButton";
+import ProfileInfoCard from "../../componets/ui/ProfileInfoCard";
 import StatCard from "../../componets/ui/StatCard";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -185,13 +186,13 @@ export default function UserProfile() {
                 <Text style={styles.bioText}>{user.bio}</Text>
               </View>
             ) : null}
-            <View style={styles.birthdayRow}>
-              <Ionicons
-                name="gift-outline"
-                size={theme.iconSize.sm}
-                color={theme.colors.textSecondary}
+            <View style={{ paddingHorizontal: theme.spacing.lg, alignSelf: "stretch" }}>
+              <ProfileInfoCard
+                icon="cake-variant"
+                label="Cumpleaños"
+                value={user.birthday || "Sin definir"}
+                accentColor="#E0609A"
               />
-              <Text style={styles.birthdayText}>{user.birthday}</Text>
             </View>
           </View>
 
