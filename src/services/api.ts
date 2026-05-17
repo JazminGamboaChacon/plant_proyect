@@ -1,8 +1,18 @@
-const API_BASE = process.env.EXPO_PUBLIC_API_URL;
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:8000";
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  try {
+    const token = await AsyncStorage.getItem("@auth_token");
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {}
+  return {};
+}
 
 async function apiFetch<T>(path: string): Promise<T> {
-  if (!API_BASE) throw new Error("EXPO_PUBLIC_API_URL no definida en .env");
-  const res = await fetch(`${API_BASE}${path}`);
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(`${API_BASE}${path}`, { headers: authHeaders });
   if (!res.ok) {
     throw new Error(`API error ${res.status}: ${path}`);
   }
@@ -71,6 +81,41 @@ export type ApiUserProfileResponse = {
   plantTypes: ApiPlantType[];
   achievements: ApiAchievement[];
 };
+
+export type AuthResponse = {
+  user: ApiUser;
+  token: string;
+  is_new_user: boolean;
+};
+
+async function authPost(path: string, body: object): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { detail?: string }).detail ?? `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+export function loginUser(email: string, password: string): Promise<AuthResponse> {
+  return authPost("/api/auth/login", { email, password });
+}
+
+export function registerUser(data: {
+  email: string;
+  password: string;
+  fullName: string;
+  username: string;
+  birthday: string;
+  favoritePlantTypes: string[];
+  photoBase64?: string;
+}): Promise<AuthResponse> {
+  return authPost("/api/auth/register", data);
+}
 
 async function apiMutate<T>(
   path: string,

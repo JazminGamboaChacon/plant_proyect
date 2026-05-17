@@ -3,12 +3,14 @@ import { AppTheme } from "../../theme/tokens/types";
 
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
-    flex: {
-      flex: 1,
-    },
     safeArea: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    flex: { flex: 1 },
+    branchesContainer: {
+      ...StyleSheet.absoluteFillObject,
+      overflow: "hidden",
     },
     scrollContent: {
       flexGrow: 1,
@@ -21,21 +23,33 @@ export const createStyles = (theme: AppTheme) =>
     // Logo
     logoContainer: {
       alignItems: "center",
-      gap: theme.spacing.sm,
+      gap: theme.spacing.xs,
     },
     logoBackground: {
-      width: 64,
-      height: 64,
-      borderRadius: theme.radius.lg,
-      backgroundColor: theme.colors.primaryPale,
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.primary,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 3,
+      borderColor: theme.colors.primaryLight,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 8,
     },
     appName: {
-      fontFamily: "Inter_700Bold",
-      fontSize: theme.typography.sizes.xl,
+      fontFamily: "Lora_400Regular_Italic",
+      fontSize: theme.typography.sizes.xxl,
       color: theme.colors.textPrimary,
-      letterSpacing: -0.5,
+      letterSpacing: 1,
+    },
+    subtitle: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
     },
 
     // Card
@@ -57,27 +71,27 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: theme.typography.sizes.lg,
       color: theme.colors.textPrimary,
       textAlign: "center",
-      marginBottom: theme.spacing.xs,
+    },
+    errorText: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: "#D32F2F",
+      textAlign: "center",
     },
 
-    // Fields
+    // Inputs
     fieldContainer: {
-      gap: 6,
-    },
-    label: {
-      fontFamily: "Inter_500Medium",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textPrimary,
+      gap: theme.spacing.xs,
     },
     inputWrapper: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.primarySoft,
       borderWidth: 1,
       borderColor: theme.colors.border,
       borderRadius: theme.radius.md,
-      paddingHorizontal: theme.spacing.md,
       height: 52,
+      paddingHorizontal: theme.spacing.md,
     },
     inputIcon: {
       marginRight: theme.spacing.sm,
@@ -87,88 +101,40 @@ export const createStyles = (theme: AppTheme) =>
       fontFamily: "Inter_400Regular",
       fontSize: theme.typography.sizes.md,
       color: theme.colors.textPrimary,
-      height: "100%",
     },
     eyeButton: {
-      padding: 4,
+      padding: theme.spacing.xs,
     },
 
     // Forgot password
     forgotContainer: {
       alignSelf: "flex-end",
-      marginTop: -theme.spacing.xs,
     },
     forgotText: {
       fontFamily: "Inter_400Regular",
       fontSize: theme.typography.sizes.sm,
-      color: theme.colors.teal,
+      color: theme.colors.primary,
     },
 
-    // Sign In button
+    // Sign In button (pill)
     signInButton: {
       backgroundColor: theme.colors.primary,
-      borderRadius: theme.radius.md,
-      height: 48,
+      borderRadius: 50,
+      height: 52,
       alignItems: "center",
       justifyContent: "center",
       marginTop: theme.spacing.xs,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
-      elevation: 3,
+    },
+    signInButtonDisabled: {
+      opacity: 0.6,
     },
     signInText: {
-      fontFamily: "Inter_500Medium",
+      fontFamily: "Inter_700Bold",
       fontSize: theme.typography.sizes.md,
-      color: "#F6F9F6",
+      color: "#fff",
     },
 
-    // Divider
-    dividerRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.spacing.sm,
-      marginVertical: theme.spacing.xs,
-    },
-    dividerLine: {
-      flex: 1,
-      height: 1,
-      backgroundColor: theme.colors.border,
-    },
-    dividerText: {
-      fontFamily: "Inter_400Regular",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textSecondary,
-    },
-
-    // Social buttons
-    socialContainer: {
-      gap: theme.spacing.sm,
-    },
-    socialButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: theme.colors.background,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.md,
-      height: 48,
-      gap: theme.spacing.sm,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 1,
-    },
-    socialText: {
-      fontFamily: "Inter_500Medium",
-      fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textPrimary,
-    },
-
-    // Register
+    // Footer
     registerRow: {
       flexDirection: "row",
       justifyContent: "center",
@@ -180,8 +146,9 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.colors.textSecondary,
     },
     registerLink: {
-      fontFamily: "Inter_500Medium",
+      fontFamily: "Inter_700Bold",
       fontSize: theme.typography.sizes.sm,
       color: theme.colors.primary,
+      textDecorationLine: "underline",
     },
   });

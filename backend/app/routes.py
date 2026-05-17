@@ -1,15 +1,18 @@
 from fastapi import APIRouter
 
 from fastapi import HTTPException
+from .auth import authenticate_user, create_session_token, register_user
 
 from .models import (
-    AchievementModel,
     AchievementWithEarned,
     ApiCollectionResponse,
+    AuthResponse,
     GroupModel,
+    LoginRequest,
     PlantCreateModel,
     PlantModel,
     PlantTypeModel,
+    RegisterRequest,
     PlantUpdateModel,
     UserModel,
     UserProfileResponse,
@@ -20,9 +23,24 @@ from .services import create_document, get_collection, get_document, update_docu
 router = APIRouter()
 
 
-@router.get("/")
-def root() -> dict:
-    return {"name": "Plant Project API", "version": "1.0.0", "docs": "/docs"}
+@router.post("/api/auth/register", response_model=AuthResponse)
+def auth_register(body: RegisterRequest) -> dict:
+    user, token = register_user(
+        body.email,
+        body.password,
+        body.fullName,
+        body.username,
+        body.birthday,
+        body.favoritePlantTypes,
+        photo_base64=body.photoBase64,
+    )
+    return {"user": user, "token": token, "is_new_user": True}
+
+
+@router.post("/api/auth/login", response_model=AuthResponse)
+def auth_login(body: LoginRequest) -> dict:
+    user, token = authenticate_user(body.email, body.password)
+    return {"user": user, "token": token, "is_new_user": False}
 
 
 @router.get("/health")
@@ -47,10 +65,7 @@ def read_user_profile(user_id: str) -> dict:
         "userAchievements", filters=[("userId", "==", user_id)]
     )
     earned_ids = {ua["achievementId"] for ua in user_achievements}
-
-    achievements = [
-        {**a, "earned": a["id"] in earned_ids} for a in all_achievements
-    ]
+    achievements = [{**a, "earned": a["id"] in earned_ids} for a in all_achievements]
 
     return {
         "user": user,
@@ -118,8 +133,4 @@ def update_plant(plant_id: str, payload: PlantUpdateModel) -> dict:
 @router.get("/api/collections/{collection_name}", response_model=ApiCollectionResponse)
 def read_collection(collection_name: str) -> dict:
     items = get_collection(collection_name)
-    return {
-        "collection": collection_name,
-        "count": len(items),
-        "items": items,
-    }
+    return {"collection": collection_name, "count": len(items), "items": items}

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -7,20 +9,45 @@ class FirestoreBaseModel(BaseModel):
 
 
 class UserStatsEmbed(BaseModel):
-    totalPlants: int
-    totalAchievements: int
-    daysActive: int
+    totalPlants: int = 0
+    totalAchievements: int = 0
+    daysActive: int = 0
 
 
 class UserModel(FirestoreBaseModel):
     email: str
     username: str
     fullName: str
-    birthday: str
+    birthday: str = ""
     photoURL: str | None = None
-    isPublicProfile: bool
+    isPublicProfile: bool = False
+    favoritePlantTypes: list[str] = []
+    stats: UserStatsEmbed = UserStatsEmbed()
+
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    fullName: str
+    username: str
+    birthday: str
     favoritePlantTypes: list[str]
-    stats: UserStatsEmbed
+    photoBase64: Optional[str] = None
+
+
+class AuthResponse(BaseModel):
+    user: UserModel
+    token: str
+    is_new_user: bool
 
 
 class AchievementModel(BaseModel):
