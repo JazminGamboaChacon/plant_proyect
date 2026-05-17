@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useToast } from "../../context/ToastContext";
 import InputText from "../../componets/ui/InputText";
@@ -31,7 +32,6 @@ import {
 } from "../../services/api";
 import { createStyles } from "./EditUserProfile.styles";
 
-const USER_ID = "user-1";
 
 type PlantIconProps = {
   lib: string;
@@ -47,6 +47,8 @@ function PlantIcon({ lib, icon, color }: PlantIconProps) {
 }
 
 export default function EditUserProfile() {
+  const { user: authUser } = useAuth();
+  const userId = authUser?.id ?? "";
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const router = useRouter();
@@ -70,6 +72,7 @@ export default function EditUserProfile() {
       fullName: "",
       username: "",
       birthday: "",
+      bio: "",
       isPublicProfile: true,
       favoritePlantTypes: [],
     },
@@ -83,7 +86,7 @@ export default function EditUserProfile() {
     async function loadData() {
       try {
         const [profileRes, typesRes] = await Promise.all([
-          fetchUserProfile(USER_ID),
+          fetchUserProfile(userId),
           fetchPlantTypes(),
         ]);
 
@@ -97,6 +100,7 @@ export default function EditUserProfile() {
           fullName: user.fullName,
           username: user.username,
           birthday: user.birthday,
+          bio: user.bio || "",
           isPublicProfile: user.isPublicProfile,
           favoritePlantTypes: user.favoritePlantTypes,
         });
@@ -126,10 +130,11 @@ export default function EditUserProfile() {
   const onSubmit = async (data: UserUpdateFormData) => {
     setSaving(true);
     try {
-      await updateUser(USER_ID, {
+      await updateUser(userId, {
         fullName: data.fullName,
         username: data.username,
         birthday: data.birthday,
+        bio: data.bio,
         isPublicProfile: data.isPublicProfile,
         favoritePlantTypes: data.favoritePlantTypes,
       });
@@ -245,6 +250,24 @@ export default function EditUserProfile() {
                   placeholder="AAAA-MM-DD"
                   leftIcon="calendar"
                   keyboardType="numeric"
+                />
+              )}
+            />
+
+            {/* Bio */}
+            <Controller
+              control={control}
+              name="bio"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <InputText
+                  label="Descripción"
+                  value={value ?? ""}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.bio?.message}
+                  placeholder="Cuéntanos sobre ti y tus plantas..."
+                  leftIcon="align-left"
+                  multiline
                 />
               )}
             />
