@@ -58,6 +58,7 @@ export default function PreferencesScreen() {
         birthday: data.birthday,
         favoritePlantTypes: selectedPlants,
         photoBase64: data.photoBase64 || undefined,
+        bio: data.bio || undefined,
       });
       await signInFromRegistration(response.user, response.token);
       clearData();
