@@ -55,18 +55,6 @@ export default function RootLayout() {
                   name="plant-detail"
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen
-                  name="edit-profile"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="edit-plant"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="plant-detail"
-                  options={{ headerShown: false }}
-                />
               </Stack>
             </SyncProvider>
           </ToastProvider>
