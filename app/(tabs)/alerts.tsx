@@ -18,7 +18,7 @@ export default function AlertsScreen() {
           fontFamily: theme.typography.families.medium,
         }}
       >
-        Alerts
+        Alertas
       </Text>
     </View>
   );
