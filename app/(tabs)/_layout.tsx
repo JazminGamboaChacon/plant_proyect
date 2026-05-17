@@ -1,9 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+import { useSync } from "../../src/context/SyncContext";
 import { useTheme } from "../../src/context/ThemeContext";
 
 export default function TabLayout() {
   const { theme } = useTheme();
+  const { pendingCount } = useSync();
 
   return (
     <Tabs
@@ -53,11 +56,22 @@ export default function TabLayout() {
         options={{
           title: "Add",
           tabBarIcon: ({ color }) => (
-            <Ionicons
-              name="add-circle-outline"
-              size={theme.iconSize.xl}
-              color={color}
-            />
+            <View>
+              <Ionicons
+                name="add-circle-outline"
+                size={theme.iconSize.xl}
+                color={color}
+              />
+              {pendingCount > 0 && (
+                <View
+                  style={[styles.badge, { backgroundColor: theme.colors.error }]}
+                >
+                  <Text style={styles.badgeText}>
+                    {pendingCount > 9 ? "9+" : String(pendingCount)}
+                  </Text>
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -90,3 +104,22 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "700",
+  },
+});

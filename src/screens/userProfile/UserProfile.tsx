@@ -1,7 +1,8 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
@@ -14,9 +15,10 @@ import { createStyles } from "./UserProfile.style";
 const USER_ID = "user-1";
 
 export default function UserProfile() {
-  const { data: user, loading, error } = useUserProfile(USER_ID);
+  const { data: user, loading, error, refetch } = useUserProfile(USER_ID);
   const { theme } = useTheme();
   const styles = createStyles(theme);
+  const router = useRouter();
 
   if (loading) {
     return (
@@ -31,11 +33,22 @@ export default function UserProfile() {
   if (error || !user) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <View style={[styles.container, { justifyContent: "center", alignItems: "center", gap: 16 }]}>
           <Ionicons name="cloud-offline-outline" size={48} color={theme.colors.textSecondary} />
-          <Text style={{ color: theme.colors.textSecondary, marginTop: 12 }}>
+          <Text style={{ color: theme.colors.textSecondary, textAlign: "center", marginHorizontal: 32 }}>
             {error || "Could not load profile"}
           </Text>
+          <TouchableOpacity
+            onPress={refetch}
+            style={{
+              backgroundColor: theme.colors.primary,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: theme.radius.md,
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "600" }}>Reintentar</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -50,6 +63,36 @@ export default function UserProfile() {
           showsVerticalScrollIndicator={false}
         >
           <Header />
+
+          {/* Botón editar perfil */}
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              alignSelf: "flex-end",
+              marginRight: theme.spacing.lg,
+              marginBottom: theme.spacing.sm,
+              paddingHorizontal: theme.spacing.md,
+              paddingVertical: theme.spacing.xs,
+              backgroundColor: theme.colors.surface,
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+              borderRadius: theme.radius.md,
+              gap: theme.spacing.xs,
+            }}
+            onPress={() => router.push("/edit-profile" as any)}
+          >
+            <Feather name="edit-2" size={14} color={theme.colors.primary} />
+            <Text
+              style={{
+                fontFamily: theme.typography.families.medium,
+                fontSize: theme.typography.sizes.sm,
+                color: theme.colors.primary,
+              }}
+            >
+              Editar Perfil
+            </Text>
+          </TouchableOpacity>
 
           {/* Perfil */}
           <View style={styles.profileSection}>
@@ -208,6 +251,101 @@ export default function UserProfile() {
           </View>
 
           <Divider />
+
+          {/* Mis Plantas */}
+          {user.plantsList.length > 0 && (
+            <>
+              <View style={styles.sectionHeader}>
+                <MaterialCommunityIcons
+                  name="sprout"
+                  size={theme.iconSize.sm}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.sectionTitle}>MY PLANTS</Text>
+              </View>
+              <View style={{ paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm, marginBottom: theme.spacing.xs }}>
+                {user.plantsList.map((plant) => (
+                  <TouchableOpacity
+                    key={plant.id}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: theme.colors.surface,
+                      borderWidth: 1,
+                      borderColor: theme.colors.border,
+                      borderRadius: theme.radius.lg,
+                      padding: theme.spacing.md,
+                      gap: theme.spacing.md,
+                    }}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/edit-plant" as any,
+                        params: { plantId: plant.id },
+                      })
+                    }
+                  >
+                    {plant.photoURL ? (
+                      <Image
+                        source={{ uri: plant.photoURL }}
+                        style={{ width: 48, height: 48, borderRadius: theme.radius.md }}
+                      />
+                    ) : (
+                      <View
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: theme.radius.md,
+                          backgroundColor: theme.colors.primaryLight,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MaterialCommunityIcons
+                          name="flower"
+                          size={24}
+                          color={theme.colors.primary}
+                        />
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontFamily: theme.typography.families.medium,
+                          fontSize: theme.typography.sizes.md,
+                          color: theme.colors.textPrimary,
+                        }}
+                      >
+                        {plant.commonName}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: theme.typography.families.scientific,
+                          fontSize: theme.typography.sizes.sm,
+                          color: theme.colors.textSecondary,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {plant.scientificName}
+                      </Text>
+                    </View>
+                    {plant.isFavorite && (
+                      <Ionicons
+                        name="heart"
+                        size={16}
+                        color={theme.colors.primary}
+                      />
+                    )}
+                    <Feather
+                      name="edit-2"
+                      size={16}
+                      color={theme.colors.textSecondary}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Divider />
+            </>
+          )}
 
           {/* Completitud */}
           <View style={styles.completionCard}>

@@ -63,12 +63,22 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
   const favPlant = plants.find((p) => p.isFavorite) || null;
   const favoritePlant = favPlant
     ? {
+        id: favPlant.id,
         name: favPlant.commonName,
         family: favPlant.scientificName,
         since: `Added ${new Date(favPlant.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long" })}`,
         imageUrl: favPlant.photoURL || "",
       }
     : null;
+
+  const plantsList = plants.map((p) => ({
+    id: p.id,
+    commonName: p.commonName,
+    scientificName: p.scientificName,
+    type: p.type,
+    isFavorite: p.isFavorite,
+    photoURL: p.photoURL,
+  }));
 
   // Profile completion: count filled fields
   const fields = [
@@ -95,6 +105,7 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     achievements: mappedAchievements,
     profileCompletion,
     plantOfTheDay: null,
+    plantsList,
   };
 }
 
@@ -102,6 +113,11 @@ export function useUserProfile(userId: string) {
   const [data, setData] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  const refetch = () => {
+    setFetchTrigger((n) => n + 1);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -129,7 +145,7 @@ export function useUserProfile(userId: string) {
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, fetchTrigger]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 }

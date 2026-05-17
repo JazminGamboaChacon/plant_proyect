@@ -117,8 +117,63 @@ export function registerUser(data: {
   return authPost("/api/auth/register", data);
 }
 
+async function apiMutate<T>(
+  path: string,
+  method: "PUT" | "POST" | "DELETE",
+  body?: unknown,
+): Promise<T> {
+  if (!API_BASE) throw new Error("EXPO_PUBLIC_API_URL no definida en .env");
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    throw new Error(errorBody?.detail || `API error ${res.status}: ${path}`);
+  }
+  return res.json();
+}
+
+export type UserUpdatePayload = {
+  username?: string;
+  fullName?: string;
+  birthday?: string;
+  photoURL?: string | null;
+  isPublicProfile?: boolean;
+  favoritePlantTypes?: string[];
+};
+
+export type PlantUpdatePayload = {
+  commonName?: string;
+  scientificName?: string;
+  photoURL?: string | null;
+  type?: string;
+  groupId?: string;
+  isFavorite?: boolean;
+  notes?: string;
+};
+
+export function updateUser(
+  userId: string,
+  data: UserUpdatePayload,
+): Promise<ApiUser> {
+  return apiMutate(`/api/users/${userId}`, "PUT", data);
+}
+
+export function updatePlant(
+  plantId: string,
+  data: PlantUpdatePayload,
+): Promise<ApiPlant> {
+  return apiMutate(`/api/plants/${plantId}`, "PUT", data);
+}
+
+export function fetchPlantDetail(plantId: string): Promise<ApiPlant> {
+  return apiFetch(`/api/plants/${plantId}`);
+}
+
 export function fetchUserProfile(
-  userId: string
+  userId: string,
 ): Promise<ApiUserProfileResponse> {
   return apiFetch(`/api/users/${userId}/profile`);
 }
@@ -130,3 +185,19 @@ export function fetchUserPlants(userId: string): Promise<ApiPlant[]> {
 export function fetchPlantTypes(): Promise<ApiPlantType[]> {
   return apiFetch("/api/plant-types");
 }
+
+export type PlantCreatePayload = {
+  userId: string;
+  commonName: string;
+  scientificName: string;
+  photoURL?: string | null;
+  type: string;
+  groupId: string;
+  isFavorite?: boolean;
+  notes?: string;
+};
+
+export function createPlant(data: PlantCreatePayload): Promise<ApiPlant> {
+  return apiMutate("/api/plants", "POST", data);
+}
+
