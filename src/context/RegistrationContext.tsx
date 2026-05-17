@@ -8,6 +8,7 @@ type RegistrationData = {
   birthday: string;
   favoritePlantTypes: string[];
   photoBase64: string;
+  bio: string;
 };
 
 const empty: RegistrationData = {
@@ -18,6 +19,7 @@ const empty: RegistrationData = {
   birthday: "",
   favoritePlantTypes: [],
   photoBase64: "",
+  bio: "",
 };
 
 type RegistrationContextType = {
