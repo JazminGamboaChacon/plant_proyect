@@ -7,8 +7,13 @@ export const createStyles = (theme: AppTheme) =>
       flex: 1,
       backgroundColor: theme.colors.background,
     },
+    flex: { flex: 1 },
+    branchesContainer: {
+      ...StyleSheet.absoluteFillObject,
+      overflow: "hidden",
+    },
     scrollContent: {
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
       paddingHorizontal: theme.spacing.lg,
       paddingVertical: theme.spacing.xl,
@@ -18,21 +23,33 @@ export const createStyles = (theme: AppTheme) =>
     // Logo
     logoContainer: {
       alignItems: "center",
-      gap: theme.spacing.sm,
+      gap: theme.spacing.xs,
     },
     logoBackground: {
-      width: 64,
-      height: 64,
-      borderRadius: theme.radius.lg,
-      backgroundColor: theme.colors.primaryPale,
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.primary,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 3,
+      borderColor: theme.colors.primaryLight,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 8,
     },
     appName: {
-      fontFamily: "Inter_700Bold",
-      fontSize: theme.typography.sizes.xl,
+      fontFamily: "Lora_400Regular_Italic",
+      fontSize: theme.typography.sizes.xxl,
       color: theme.colors.textPrimary,
-      letterSpacing: -0.5,
+      letterSpacing: 1,
+    },
+    subtitle: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
     },
 
     // Card
@@ -55,34 +72,83 @@ export const createStyles = (theme: AppTheme) =>
       color: theme.colors.textPrimary,
       textAlign: "center",
     },
-    subtitle: {
+    errorText: {
       fontFamily: "Inter_400Regular",
       fontSize: theme.typography.sizes.sm,
-      color: theme.colors.textSecondary,
+      color: "#D32F2F",
       textAlign: "center",
-      marginBottom: theme.spacing.sm,
     },
 
-    // Google button
-    googleButton: {
+    // Inputs
+    fieldContainer: {
+      gap: theme.spacing.xs,
+    },
+    inputWrapper: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.primarySoft,
       borderWidth: 1,
       borderColor: theme.colors.border,
       borderRadius: theme.radius.md,
       height: 52,
-      gap: theme.spacing.sm,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
+      paddingHorizontal: theme.spacing.md,
     },
-    googleButtonText: {
-      fontFamily: "Inter_500Medium",
+    inputIcon: {
+      marginRight: theme.spacing.sm,
+    },
+    input: {
+      flex: 1,
+      fontFamily: "Inter_400Regular",
       fontSize: theme.typography.sizes.md,
       color: theme.colors.textPrimary,
+    },
+    eyeButton: {
+      padding: theme.spacing.xs,
+    },
+
+    // Forgot password
+    forgotContainer: {
+      alignSelf: "flex-end",
+    },
+    forgotText: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.primary,
+    },
+
+    // Sign In button (pill)
+    signInButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 50,
+      height: 52,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: theme.spacing.xs,
+    },
+    signInButtonDisabled: {
+      opacity: 0.6,
+    },
+    signInText: {
+      fontFamily: "Inter_700Bold",
+      fontSize: theme.typography.sizes.md,
+      color: "#fff",
+    },
+
+    // Footer
+    registerRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    registerText: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
+    },
+    registerLink: {
+      fontFamily: "Inter_700Bold",
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.primary,
+      textDecorationLine: "underline",
     },
   });
