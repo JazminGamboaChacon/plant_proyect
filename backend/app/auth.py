@@ -44,6 +44,7 @@ def register_user(
     birthday: str,
     favorite_plant_types: list[str],
     photo_base64: str | None = None,
+    bio: str = "",
 ) -> tuple[dict, str]:
     db = get_firestore_client()
 
@@ -58,6 +59,7 @@ def register_user(
         "fullName": full_name,
         "username": username,
         "birthday": birthday,
+        "bio": bio,
         "photoURL": f"data:image/jpeg;base64,{photo_base64}" if photo_base64 else None,
         "isPublicProfile": False,
         "favoritePlantTypes": favorite_plant_types,
