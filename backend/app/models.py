@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -25,6 +27,21 @@ class UserModel(FirestoreBaseModel):
 
 class GoogleAuthRequest(BaseModel):
     id_token: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    fullName: str
+    username: str
+    birthday: str
+    favoritePlantTypes: list[str]
+    photoBase64: Optional[str] = None
 
 
 class AuthResponse(BaseModel):
