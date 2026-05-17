@@ -32,9 +32,19 @@ const PLANT_TYPE_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1597305877032-0668b3c6413a?w=200&h=200&fit=crop",
 };
 
-function formatBirthday(iso: string): string {
-  const date = new Date(iso + "T00:00:00");
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+function formatBirthday(value: string): string {
+  if (!value || value.trim() === "") return "";
+  let date: Date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    date = new Date(value + "T00:00:00");
+  } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+    const [d, m, y] = value.split("/");
+    date = new Date(Number(y), Number(m) - 1, Number(d));
+  } else {
+    return value;
+  }
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("es-CR", { month: "long", day: "numeric", year: "numeric" });
 }
 
 function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
@@ -95,7 +105,7 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     name: user.fullName,
     handle: `@${user.username}`,
     avatarUrl: user.photoURL || "",
-    bio: "",
+    bio: user.bio || "",
     birthday: formatBirthday(user.birthday),
     streak: user.stats.daysActive,
     friends: 0,
