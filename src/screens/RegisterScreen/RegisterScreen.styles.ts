@@ -24,18 +24,29 @@ export const createStyles = (theme: AppTheme) =>
       gap: theme.spacing.sm,
     },
     logoBackground: {
-      width: 64,
-      height: 64,
-      borderRadius: theme.radius.lg,
-      backgroundColor: theme.colors.primaryPale,
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.primary,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 3,
+      borderColor: theme.colors.primaryLight,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 8,
     },
     appName: {
-      fontFamily: "Inter_700Bold",
-      fontSize: theme.typography.sizes.xl,
+      fontFamily: "Lora_400Regular_Italic",
+      fontSize: theme.typography.sizes.xxl,
       color: theme.colors.textPrimary,
-      letterSpacing: -0.5,
+      letterSpacing: 1,
+    },
+    branchesContainer: {
+      ...StyleSheet.absoluteFillObject,
+      overflow: "hidden",
     },
 
     // Steps
@@ -144,6 +155,34 @@ export const createStyles = (theme: AppTheme) =>
       fontFamily: "Inter_500Medium",
       fontSize: theme.typography.sizes.md,
       color: "#F6F9F6",
+    },
+
+    // Error text
+    errorText: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.sm,
+      color: "#D32F2F",
+      textAlign: "center",
+    },
+
+    // Password strength bar
+    strengthContainer: {
+      gap: 4,
+    },
+    strengthSegments: {
+      flexDirection: "row",
+      gap: 4,
+    },
+    strengthSegment: {
+      flex: 1,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: theme.colors.border,
+    },
+    strengthLabel: {
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.xs,
+      color: theme.colors.textSecondary,
     },
 
     // Sign in
