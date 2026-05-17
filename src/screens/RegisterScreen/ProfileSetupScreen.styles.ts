@@ -24,18 +24,29 @@ export const createStyles = (theme: AppTheme) =>
       gap: theme.spacing.sm,
     },
     logoBackground: {
-      width: 64,
-      height: 64,
-      borderRadius: theme.radius.lg,
-      backgroundColor: theme.colors.primaryPale,
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.primary,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 3,
+      borderColor: theme.colors.primaryLight,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 8,
     },
     appName: {
-      fontFamily: "Inter_700Bold",
-      fontSize: theme.typography.sizes.xl,
+      fontFamily: "Lora_400Regular_Italic",
+      fontSize: theme.typography.sizes.xxl,
       color: theme.colors.textPrimary,
-      letterSpacing: -0.5,
+      letterSpacing: 1,
+    },
+    branchesContainer: {
+      ...StyleSheet.absoluteFillObject,
+      overflow: "hidden",
     },
 
     // Steps
@@ -49,9 +60,7 @@ export const createStyles = (theme: AppTheme) =>
       width: 40,
       height: 40,
       borderRadius: theme.radius.full,
-      backgroundColor: theme.colors.primaryPale,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.primary,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -124,6 +133,12 @@ export const createStyles = (theme: AppTheme) =>
       borderStyle: "dashed",
       alignItems: "center",
       justifyContent: "center",
+      overflow: "hidden",
+    },
+    avatarImage: {
+      width: 80,
+      height: 80,
+      borderRadius: theme.radius.full,
     },
     avatarEditButton: {
       position: "absolute",
@@ -167,6 +182,12 @@ export const createStyles = (theme: AppTheme) =>
       fontSize: theme.typography.sizes.md,
       color: theme.colors.textPrimary,
       height: "100%",
+    },
+    birthdayText: {
+      flex: 1,
+      fontFamily: "Inter_400Regular",
+      fontSize: theme.typography.sizes.md,
+      color: theme.colors.textPrimary,
     },
 
     // Buttons row
