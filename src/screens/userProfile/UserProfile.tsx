@@ -8,14 +8,14 @@ import Header from "../../componets/common/Header";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
 import CategoryButton from "../../componets/ui/CategoryButton";
 import StatCard from "../../componets/ui/StatCard";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { createStyles } from "./UserProfile.style";
 
-const USER_ID = "user-1";
-
 export default function UserProfile() {
-  const { data: user, loading, error, refetch } = useUserProfile(USER_ID);
+  const { user: authUser, signOut } = useAuth();
+  const { data: user, loading, error, refetch } = useUserProfile(authUser?.id ?? "");
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function UserProfile() {
         <View style={[styles.container, { justifyContent: "center", alignItems: "center", gap: 16 }]}>
           <Ionicons name="cloud-offline-outline" size={48} color={theme.colors.textSecondary} />
           <Text style={{ color: theme.colors.textSecondary, textAlign: "center", marginHorizontal: 32 }}>
-            {error || "Could not load profile"}
+            {error || "No se pudo cargar el perfil"}
           </Text>
           <TouchableOpacity
             onPress={refetch}
@@ -142,7 +142,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.streak)}
-              label="Streak"
+              label="Racha"
               iconBg={theme.colors.peach}
             />
             <StatCard
@@ -154,7 +154,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.friends)}
-              label="Friends"
+              label="Amigos"
               iconBg={theme.colors.primaryLight}
             />
             <StatCard
@@ -166,7 +166,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.plants)}
-              label="Plants"
+              label="Plantas"
               iconBg={theme.colors.teal}
             />
           </View>
@@ -188,7 +188,7 @@ export default function UserProfile() {
                   </View>
                 )}
                 <View style={styles.favPlantInfo}>
-                  <Text style={styles.favPlantLabel}>FAVORITE PLANT</Text>
+                  <Text style={styles.favPlantLabel}>PLANTA FAVORITA</Text>
                   <Text style={styles.favPlantName}>
                     {user.favoritePlant.name}
                   </Text>
@@ -211,7 +211,7 @@ export default function UserProfile() {
               size={theme.iconSize.sm}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.sectionTitle}>PLANT CATEGORIES</Text>
+            <Text style={styles.sectionTitle}>CATEGORÍAS DE PLANTAS</Text>
           </View>
           <ScrollView
             horizontal
@@ -233,7 +233,7 @@ export default function UserProfile() {
               size={theme.iconSize.sm}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.sectionTitle}>ACHIEVEMENTS</Text>
+            <Text style={styles.sectionTitle}>LOGROS</Text>
           </View>
           <View style={styles.badgesRow}>
             {user.achievements
@@ -261,7 +261,7 @@ export default function UserProfile() {
                   size={theme.iconSize.sm}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.sectionTitle}>MY PLANTS</Text>
+                <Text style={styles.sectionTitle}>MIS PLANTAS</Text>
               </View>
               <View style={{ paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm, marginBottom: theme.spacing.xs }}>
                 {user.plantsList.map((plant) => (
@@ -356,7 +356,7 @@ export default function UserProfile() {
                   size={theme.iconSize.md}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.completionTitle}>Profile Completion</Text>
+                <Text style={styles.completionTitle}>Completitud del perfil</Text>
               </View>
               <Text style={styles.completionPct}>
                 {user.profileCompletion}%
@@ -371,9 +371,37 @@ export default function UserProfile() {
               />
             </View>
             <Text style={styles.completionHint}>
-              Add more info to complete your profile!
+              ¡Agrega más información para completar tu perfil!
             </Text>
           </View>
+
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              marginHorizontal: theme.spacing.lg,
+              marginTop: theme.spacing.md,
+              paddingVertical: theme.spacing.md,
+              backgroundColor: "#FFF0F0",
+              borderWidth: 1,
+              borderColor: "#FFCDD2",
+              borderRadius: theme.radius.md,
+              gap: theme.spacing.xs,
+            }}
+            onPress={() => signOut()}
+          >
+            <Ionicons name="log-out-outline" size={18} color="#D32F2F" />
+            <Text
+              style={{
+                fontFamily: theme.typography.families.medium,
+                fontSize: theme.typography.sizes.sm,
+                color: "#D32F2F",
+              }}
+            >
+              Cerrar sesión
+            </Text>
+          </TouchableOpacity>
 
           <View style={{ height: theme.spacing.md }} />
         </ScrollView>
