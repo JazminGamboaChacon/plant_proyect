@@ -1,55 +1,22 @@
 from datetime import datetime, timezone
 
+import bcrypt
 import jwt
 from fastapi import HTTPException
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token as google_id_token
 
 from .config import get_settings
 from .firebase import get_firestore_client
 
 
-def verify_google_token(token: str) -> dict:
-    settings = get_settings()
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_password(plain: str, hashed: str) -> bool:
     try:
-        payload = google_id_token.verify_oauth2_token(
-            token,
-            google_requests.Request(),
-            settings.google_client_id,
-        )
-        return payload
-    except ValueError as e:
-        raise HTTPException(status_code=401, detail=f"Token de Google invalido: {e}")
-
-
-def get_or_create_user(google_payload: dict) -> tuple[dict, bool]:
-    db = get_firestore_client()
-    email = google_payload["email"]
-
-    existing = db.collection("users").where("email", "==", email).limit(1).stream()
-    for doc in existing:
-        user_data = doc.to_dict()
-        user_data["id"] = doc.id
-        if hasattr(user_data.get("createdAt"), "isoformat"):
-            user_data["createdAt"] = user_data["createdAt"].isoformat()
-        return user_data, False
-
-    now = datetime.now(timezone.utc).isoformat()
-    username = email.split("@")[0]
-    new_user = {
-        "email": email,
-        "fullName": google_payload.get("name", ""),
-        "username": username,
-        "birthday": "",
-        "photoURL": google_payload.get("picture"),
-        "isPublicProfile": False,
-        "favoritePlantTypes": [],
-        "stats": {"totalPlants": 0, "totalAchievements": 0, "daysActive": 0},
-        "createdAt": now,
-    }
-    doc_ref = db.collection("users").add(new_user)
-    new_user["id"] = doc_ref[1].id
-    return new_user, True
+        return bcrypt.checkpw(plain.encode(), hashed.encode())
+    except Exception:
+        return False
 
 
 def create_session_token(user_id: str) -> str:
@@ -59,3 +26,63 @@ def create_session_token(user_id: str) -> str:
         "iat": datetime.now(timezone.utc),
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+
+
+def _normalize_user(doc_data: dict, doc_id: str) -> dict:
+    doc_data["id"] = doc_id
+    if hasattr(doc_data.get("createdAt"), "isoformat"):
+        doc_data["createdAt"] = doc_data["createdAt"].isoformat()
+    doc_data.pop("passwordHash", None)
+    return doc_data
+
+
+def register_user(
+    email: str,
+    password: str,
+    full_name: str,
+    username: str,
+    birthday: str,
+    favorite_plant_types: list[str],
+    photo_base64: str | None = None,
+) -> tuple[dict, str]:
+    db = get_firestore_client()
+
+    existing = db.collection("users").where("email", "==", email).limit(1).stream()
+    for _ in existing:
+        raise HTTPException(status_code=409, detail="Este email ya está registrado")
+
+    now = datetime.now(timezone.utc).isoformat()
+    new_user: dict = {
+        "email": email,
+        "passwordHash": hash_password(password),
+        "fullName": full_name,
+        "username": username,
+        "birthday": birthday,
+        "photoURL": f"data:image/jpeg;base64,{photo_base64}" if photo_base64 else None,
+        "isPublicProfile": False,
+        "favoritePlantTypes": favorite_plant_types,
+        "stats": {"totalPlants": 0, "totalAchievements": 0, "daysActive": 0},
+        "createdAt": now,
+    }
+    doc_ref = db.collection("users").add(new_user)
+    new_user = _normalize_user(new_user, doc_ref[1].id)
+    token = create_session_token(new_user["id"])
+    return new_user, token
+
+
+def authenticate_user(email: str, password: str) -> tuple[dict, str]:
+    db = get_firestore_client()
+
+    docs = db.collection("users").where("email", "==", email).limit(1).stream()
+    user_data = None
+    doc_id = None
+    for doc in docs:
+        user_data = doc.to_dict()
+        doc_id = doc.id
+
+    if not user_data or not verify_password(password, user_data.get("passwordHash", "")):
+        raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+
+    user_data = _normalize_user(user_data, doc_id)
+    token = create_session_token(user_data["id"])
+    return user_data, token
