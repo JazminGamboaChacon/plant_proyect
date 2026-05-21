@@ -181,10 +181,27 @@ export default function ProfileSetupScreen() {
 
             <View style={styles.fieldContainer}>
               <Text style={styles.label}>Descripción (opcional)</Text>
-              <View style={[styles.inputWrapper, { alignItems: "flex-start", paddingTop: 10 }]}>
-                <Feather name="align-left" size={18} color={theme.colors.textSecondary} style={[styles.inputIcon, { marginTop: 2 }]} />
+              <View style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                backgroundColor: theme.colors.background,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                borderRadius: theme.radius.md,
+                paddingHorizontal: theme.spacing.md,
+                paddingTop: 12,
+                paddingBottom: 12,
+                minHeight: 88,
+              }}>
+                <Feather name="align-left" size={18} color={theme.colors.textSecondary} style={{ marginRight: theme.spacing.sm, marginTop: 2 }} />
                 <TextInput
-                  style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                  style={{
+                    flex: 1,
+                    fontFamily: "Inter_400Regular",
+                    fontSize: theme.typography.sizes.md,
+                    color: theme.colors.textPrimary,
+                    textAlignVertical: "top",
+                  }}
                   value={bio}
                   onChangeText={setBio}
                   placeholder="Cuéntanos sobre ti y tus plantas..."
@@ -195,7 +212,7 @@ export default function ProfileSetupScreen() {
               </View>
             </View>
 
-            <View style={styles.fieldContainer}>
+            <View style={[styles.fieldContainer, { marginTop: theme.spacing.sm }]}>
               <Text style={styles.label}>Fecha de nacimiento</Text>
               <TouchableOpacity
                 style={styles.inputWrapper}
