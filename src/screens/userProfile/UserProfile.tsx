@@ -1,21 +1,96 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect } from "react";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import Svg, { Circle, Ellipse } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
 import CategoryButton from "../../componets/ui/CategoryButton";
+import ProfileInfoCard from "../../componets/ui/ProfileInfoCard";
 import StatCard from "../../componets/ui/StatCard";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { createStyles } from "./UserProfile.style";
 
-const USER_ID = "user-1";
+const FLOWER_SIZE = 168;
+const AVATAR_SIZE = 120;
+const PETALS = [0, 45, 90, 135, 180, 225, 270, 315];
+const DOTS = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
+
+function FlowerAvatar({ uri, fallbackColor }: { uri: string | null; fallbackColor: string }) {
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, { duration: 14000, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, []);
+
+  const flowerStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  return (
+    <View style={{ width: FLOWER_SIZE, height: FLOWER_SIZE, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+      <Animated.View style={[StyleSheet.absoluteFill, flowerStyle]}>
+        <Svg width={FLOWER_SIZE} height={FLOWER_SIZE} viewBox="0 0 168 168">
+          {PETALS.map((angle, i) => (
+            <Ellipse
+              key={`p${i}`}
+              cx="84" cy="18" rx="9" ry="20"
+              fill={i % 2 === 0 ? "#FFD166" : "#FFC039"}
+              opacity={0.88}
+              transform={`rotate(${angle} 84 84)`}
+            />
+          ))}
+          {DOTS.map((angle, i) => (
+            <Circle
+              key={`d${i}`}
+              cx="84" cy="30" r="5"
+              fill="#FF9A3C"
+              opacity={0.8}
+              transform={`rotate(${angle} 84 84)`}
+            />
+          ))}
+        </Svg>
+      </Animated.View>
+      <View
+        style={{
+          width: AVATAR_SIZE,
+          height: AVATAR_SIZE,
+          borderRadius: AVATAR_SIZE / 2,
+          borderWidth: 4,
+          borderColor: "#fff",
+          overflow: "hidden",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 6,
+          elevation: 5,
+          zIndex: 2,
+        }}
+      >
+        {uri ? (
+          <Image source={{ uri }} style={{ width: "100%", height: "100%" }} />
+        ) : (
+          <View style={{ flex: 1, backgroundColor: fallbackColor, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name="person" size={40} color="#397949" />
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
 
 export default function UserProfile() {
-  const { data: user, loading, error, refetch } = useUserProfile(USER_ID);
+  const { user: authUser, signOut } = useAuth();
+  const { data: user, loading, error, refetch } = useUserProfile(authUser?.id ?? "");
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const router = useRouter();
@@ -36,7 +111,7 @@ export default function UserProfile() {
         <View style={[styles.container, { justifyContent: "center", alignItems: "center", gap: 16 }]}>
           <Ionicons name="cloud-offline-outline" size={48} color={theme.colors.textSecondary} />
           <Text style={{ color: theme.colors.textSecondary, textAlign: "center", marginHorizontal: 32 }}>
-            {error || "Could not load profile"}
+            {error || "No se pudo cargar el perfil"}
           </Text>
           <TouchableOpacity
             onPress={refetch}
@@ -96,15 +171,7 @@ export default function UserProfile() {
 
           {/* Perfil */}
           <View style={styles.profileSection}>
-            <View style={styles.avatarWrapper}>
-              {user.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-              ) : (
-                <View style={[styles.avatar, { backgroundColor: theme.colors.primaryLight, justifyContent: "center", alignItems: "center" }]}>
-                  <Ionicons name="person" size={theme.iconSize.lg} color={theme.colors.primary} />
-                </View>
-              )}
-            </View>
+            <FlowerAvatar uri={user.avatarUrl} fallbackColor={theme.colors.primaryLight} />
             <Text style={styles.profileName}>{user.name}</Text>
             <Text style={styles.profileHandle}>{user.handle}</Text>
             {user.bio ? (
@@ -119,13 +186,13 @@ export default function UserProfile() {
                 <Text style={styles.bioText}>{user.bio}</Text>
               </View>
             ) : null}
-            <View style={styles.birthdayRow}>
-              <Ionicons
-                name="gift-outline"
-                size={theme.iconSize.sm}
-                color={theme.colors.textSecondary}
+            <View style={{ paddingHorizontal: theme.spacing.lg, alignSelf: "stretch" }}>
+              <ProfileInfoCard
+                icon="cake-variant"
+                label="Cumpleaños"
+                value={user.birthday || "Sin definir"}
+                accentColor="#E0609A"
               />
-              <Text style={styles.birthdayText}>{user.birthday}</Text>
             </View>
           </View>
 
@@ -142,7 +209,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.streak)}
-              label="Streak"
+              label="Racha"
               iconBg={theme.colors.peach}
             />
             <StatCard
@@ -154,7 +221,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.friends)}
-              label="Friends"
+              label="Amigos"
               iconBg={theme.colors.primaryLight}
             />
             <StatCard
@@ -166,7 +233,7 @@ export default function UserProfile() {
                 />
               }
               value={String(user.plants)}
-              label="Plants"
+              label="Plantas"
               iconBg={theme.colors.teal}
             />
           </View>
@@ -188,7 +255,7 @@ export default function UserProfile() {
                   </View>
                 )}
                 <View style={styles.favPlantInfo}>
-                  <Text style={styles.favPlantLabel}>FAVORITE PLANT</Text>
+                  <Text style={styles.favPlantLabel}>PLANTA FAVORITA</Text>
                   <Text style={styles.favPlantName}>
                     {user.favoritePlant.name}
                   </Text>
@@ -211,7 +278,7 @@ export default function UserProfile() {
               size={theme.iconSize.sm}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.sectionTitle}>PLANT CATEGORIES</Text>
+            <Text style={styles.sectionTitle}>CATEGORÍAS DE PLANTAS</Text>
           </View>
           <ScrollView
             horizontal
@@ -233,7 +300,7 @@ export default function UserProfile() {
               size={theme.iconSize.sm}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.sectionTitle}>ACHIEVEMENTS</Text>
+            <Text style={styles.sectionTitle}>LOGROS</Text>
           </View>
           <View style={styles.badgesRow}>
             {user.achievements
@@ -261,7 +328,7 @@ export default function UserProfile() {
                   size={theme.iconSize.sm}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.sectionTitle}>MY PLANTS</Text>
+                <Text style={styles.sectionTitle}>MIS PLANTAS</Text>
               </View>
               <View style={{ paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm, marginBottom: theme.spacing.xs }}>
                 {user.plantsList.map((plant) => (
@@ -356,7 +423,7 @@ export default function UserProfile() {
                   size={theme.iconSize.md}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.completionTitle}>Profile Completion</Text>
+                <Text style={styles.completionTitle}>Completitud del perfil</Text>
               </View>
               <Text style={styles.completionPct}>
                 {user.profileCompletion}%
@@ -371,9 +438,37 @@ export default function UserProfile() {
               />
             </View>
             <Text style={styles.completionHint}>
-              Add more info to complete your profile!
+              ¡Agrega más información para completar tu perfil!
             </Text>
           </View>
+
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              marginHorizontal: theme.spacing.lg,
+              marginTop: theme.spacing.md,
+              paddingVertical: theme.spacing.md,
+              backgroundColor: "#FFF0F0",
+              borderWidth: 1,
+              borderColor: "#FFCDD2",
+              borderRadius: theme.radius.md,
+              gap: theme.spacing.xs,
+            }}
+            onPress={() => signOut()}
+          >
+            <Ionicons name="log-out-outline" size={18} color="#D32F2F" />
+            <Text
+              style={{
+                fontFamily: theme.typography.families.medium,
+                fontSize: theme.typography.sizes.sm,
+                color: "#D32F2F",
+              }}
+            >
+              Cerrar sesión
+            </Text>
+          </TouchableOpacity>
 
           <View style={{ height: theme.spacing.md }} />
         </ScrollView>

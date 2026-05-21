@@ -16,6 +16,11 @@ export const userUpdateSchema = z.object({
   birthday: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "El formato debe ser AAAA-MM-DD"),
+  bio: z
+    .string()
+    .max(300, "La descripción no puede exceder 300 caracteres")
+    .optional()
+    .or(z.literal("")),
   isPublicProfile: z.boolean(),
   favoritePlantTypes: z
     .array(z.string())

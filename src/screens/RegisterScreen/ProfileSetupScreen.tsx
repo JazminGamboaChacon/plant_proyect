@@ -44,6 +44,7 @@ export default function ProfileSetupScreen() {
   const [fullName, setFullName] = useState(data.fullName);
   const [username, setUsername] = useState(data.username || data.email.split("@")[0]);
   const [birthday, setBirthday] = useState(data.birthday);
+  const [bio, setBio] = useState(data.bio || "");
   const [photoBase64, setPhotoBase64] = useState(data.photoBase64);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(parseBirthday(data.birthday));
@@ -70,7 +71,7 @@ export default function ProfileSetupScreen() {
       setError("Ingresa un nombre de usuario");
       return;
     }
-    updateData({ fullName: fullName.trim(), username: username.trim(), birthday, photoBase64 });
+    updateData({ fullName: fullName.trim(), username: username.trim(), birthday, photoBase64, bio: bio.trim() });
     router.push("/preference");
   };
 
@@ -174,6 +175,22 @@ export default function ProfileSetupScreen() {
                   placeholderTextColor={theme.colors.textSecondary}
                   autoCapitalize="none"
                   autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            <View style={styles.fieldContainer}>
+              <Text style={styles.label}>Descripción (opcional)</Text>
+              <View style={[styles.inputWrapper, { alignItems: "flex-start", paddingTop: 10 }]}>
+                <Feather name="align-left" size={18} color={theme.colors.textSecondary} style={[styles.inputIcon, { marginTop: 2 }]} />
+                <TextInput
+                  style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Cuéntanos sobre ti y tus plantas..."
+                  placeholderTextColor={theme.colors.textSecondary}
+                  multiline
+                  maxLength={300}
                 />
               </View>
             </View>

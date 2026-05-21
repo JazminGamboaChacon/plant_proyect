@@ -28,7 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Inicio",
           tabBarIcon: ({ color }) => (
             <Ionicons
               name="home-outline"
@@ -41,7 +41,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
+          title: "Explorar",
           tabBarIcon: ({ color }) => (
             <Ionicons
               name="search-outline"
@@ -54,7 +54,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="add"
         options={{
-          title: "Add",
+          title: "Agregar",
           tabBarIcon: ({ color }) => (
             <View>
               <Ionicons
@@ -78,7 +78,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="alerts"
         options={{
-          title: "Alerts",
+          title: "Alertas",
           tabBarIcon: ({ color }) => (
             <Ionicons
               name="notifications-outline"
@@ -91,7 +91,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Perfil",
           tabBarIcon: ({ color }) => (
             <Ionicons
               name="person-outline"

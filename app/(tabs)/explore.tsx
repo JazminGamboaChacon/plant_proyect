@@ -18,7 +18,7 @@ export default function ExploreScreen() {
           fontFamily: theme.typography.families.medium,
         }}
       >
-        Explore
+        Explorar
       </Text>
     </View>
   );

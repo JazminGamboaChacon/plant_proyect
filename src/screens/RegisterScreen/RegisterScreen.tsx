@@ -107,7 +107,7 @@ export default function RegisterScreen() {
                   style={styles.input}
                   value={email}
                   onChangeText={(t) => { setEmail(t); setError(""); }}
-                  placeholder="your@email.com"
+                  placeholder="tu@email.com"
                   placeholderTextColor={theme.colors.textSecondary}
                   keyboardType="email-address"
                   autoCapitalize="none"

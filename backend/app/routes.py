@@ -33,6 +33,7 @@ def auth_register(body: RegisterRequest) -> dict:
         body.birthday,
         body.favoritePlantTypes,
         photo_base64=body.photoBase64,
+        bio=body.bio,
     )
     return {"user": user, "token": token, "is_new_user": True}
 

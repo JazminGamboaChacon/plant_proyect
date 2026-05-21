@@ -31,6 +31,7 @@ export type ApiUser = {
   username: string;
   fullName: string;
   birthday: string;
+  bio: string;
   photoURL: string | null;
   isPublicProfile: boolean;
   favoritePlantTypes: string[];
@@ -113,6 +114,7 @@ export function registerUser(data: {
   birthday: string;
   favoritePlantTypes: string[];
   photoBase64?: string;
+  bio?: string;
 }): Promise<AuthResponse> {
   return authPost("/api/auth/register", data);
 }
@@ -139,6 +141,7 @@ export type UserUpdatePayload = {
   username?: string;
   fullName?: string;
   birthday?: string;
+  bio?: string;
   photoURL?: string | null;
   isPublicProfile?: boolean;
   favoritePlantTypes?: string[];
