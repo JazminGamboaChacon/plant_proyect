@@ -4,20 +4,20 @@ import { AppTheme } from "../../theme/tokens/types";
 export const createStyles = (theme: AppTheme) =>
   StyleSheet.create({
     categoryBtn: {
-      width: 90,
+      width: 120,
       backgroundColor: theme.colors.surface,
       borderWidth: 1,
       borderColor: theme.colors.border,
       borderRadius: theme.radius.lg,
       alignItems: "center",
-      paddingVertical: theme.spacing.sm,
+      paddingVertical: theme.spacing.md,
     },
     categoryIconBg: {
-      width: theme.iconSize.lg,
-      height: theme.iconSize.lg,
+      width: 72,
+      height: 72,
       borderRadius: theme.radius.full,
       overflow: "hidden",
-      marginBottom: theme.spacing.xs,
+      marginBottom: theme.spacing.sm,
     },
     categoryImage: {
       width: "100%",
