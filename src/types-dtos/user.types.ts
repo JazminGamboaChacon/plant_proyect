@@ -49,12 +49,10 @@ export type UserProfileData = {
   bio: string;
   birthday: string;
   streak: number;
-  friends: number;
   plants: number;
   favoritePlant: FavoritePlant | null;
   categories: Category[];
   achievements: Achievement[];
-  profileCompletion: number;
   plantOfTheDay: PlantOfTheDay | null;
   plantsList: PlantSummary[];
 };
