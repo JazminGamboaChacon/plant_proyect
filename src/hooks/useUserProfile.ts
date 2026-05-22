@@ -24,12 +24,32 @@ const PLANT_TYPE_IMAGES: Record<string, string> = {
     "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=200&h=200&fit=crop",
   flowering:
     "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop",
+  flower:
+    "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop",
   herbs:
     "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop",
   cacti:
     "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=200&h=200&fit=crop",
   ferns:
     "https://images.unsplash.com/photo-1597305877032-0668b3c6413a?w=200&h=200&fit=crop",
+};
+
+const PLANT_TYPE_LABELS: Record<string, string> = {
+  succulents: "Suculentas",
+  tropical:   "Tropicales",
+  flowering:  "Flores",
+  flower:     "Flores",
+  herbs:      "Hierbas",
+  cacti:      "Cactus",
+  ferns:      "Helechos",
+};
+
+const ACHIEVEMENT_LABEL_MAP: Record<string, string> = {
+  leaf:    "Primera Planta",
+  flower:  "Jardinero Florido",
+  flame:   "En Racha",
+  compass: "Explorador",
+  grid:    "Coleccionista",
 };
 
 function formatBirthday(value: string): string {
@@ -58,14 +78,14 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
 
   const categories = plantTypes.map((pt) => ({
     imageUrl: PLANT_TYPE_IMAGES[pt.id] || "",
-    name: pt.label,
+    name: PLANT_TYPE_LABELS[pt.id] || pt.label,
     count: plantCountByType[pt.id] || 0,
   }));
 
   // Map achievements
   const mappedAchievements = achievements.map((a) => ({
     iconName: (ICON_MAP[a.icon] || "help-outline") as IoniconsName,
-    label: a.label,
+    label: ACHIEVEMENT_LABEL_MAP[a.icon] || a.label,
     earned: a.earned,
   }));
 
@@ -90,17 +110,6 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     photoURL: p.photoURL,
   }));
 
-  // Profile completion: count filled fields
-  const fields = [
-    user.fullName,
-    user.email,
-    user.username,
-    user.birthday,
-    user.photoURL,
-  ];
-  const filled = fields.filter((f) => f !== null && f !== "").length;
-  const profileCompletion = Math.round((filled / fields.length) * 100);
-
   return {
     name: user.fullName,
     handle: `@${user.username}`,
@@ -108,12 +117,10 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     bio: user.bio || "",
     birthday: formatBirthday(user.birthday),
     streak: user.stats.daysActive,
-    friends: 0,
     plants: user.stats.totalPlants,
     favoritePlant,
     categories,
     achievements: mappedAchievements,
-    profileCompletion,
     plantOfTheDay: null,
     plantsList,
   };
