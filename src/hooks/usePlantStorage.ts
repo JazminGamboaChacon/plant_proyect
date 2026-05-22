@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LocalPlant, LocalPlantDraft } from '../types-dtos/plant.types';
 import {
   addPlant,
+  deletePlant,
   loadPlants,
   persistPhoto,
 } from '../services/plantStorageService';
@@ -17,6 +18,7 @@ export interface UsePlantStorageReturn {
     draft: Omit<LocalPlantDraft, 'localPhotoUri'>,
     tempPhotoUri: string
   ) => Promise<LocalPlant>;
+  removePlant: (localId: string) => Promise<void>;
   syncNow: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -53,6 +55,11 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
     [refresh]
   );
 
+  const removePlant = useCallback(async (localId: string) => {
+    await deletePlant(localId);
+    await refresh();
+  }, [refresh]);
+
   const syncNow = useCallback(async () => {
     if (isSyncing) return;
     setIsSyncing(true);
@@ -81,6 +88,7 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
     isSyncing,
     lastSyncError,
     savePlant,
+    removePlant,
     syncNow,
     refresh,
   };
