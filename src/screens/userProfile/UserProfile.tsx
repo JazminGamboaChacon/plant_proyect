@@ -89,7 +89,7 @@ function FlowerAvatar({ uri, fallbackColor }: { uri: string | null; fallbackColo
 }
 
 export default function UserProfile() {
-  const { user: authUser, signOut } = useAuth();
+  const { user: authUser } = useAuth();
   const { data: user, loading, error, refetch } = useUserProfile(authUser?.id ?? "");
   const { theme } = useTheme();
   const styles = createStyles(theme);
@@ -211,18 +211,6 @@ export default function UserProfile() {
               value={String(user.streak)}
               label="Racha"
               iconBg={theme.colors.peach}
-            />
-            <StatCard
-              icon={
-                <Ionicons
-                  name="people-outline"
-                  size={theme.iconSize.md}
-                  color={theme.colors.textPrimary}
-                />
-              }
-              value={String(user.friends)}
-              label="Amigos"
-              iconBg={theme.colors.primaryLight}
             />
             <StatCard
               icon={
@@ -413,62 +401,6 @@ export default function UserProfile() {
               <Divider />
             </>
           )}
-
-          {/* Completitud */}
-          <View style={styles.completionCard}>
-            <View style={styles.completionTop}>
-              <View style={styles.completionTitleRow}>
-                <Ionicons
-                  name="person-circle-outline"
-                  size={theme.iconSize.md}
-                  color={theme.colors.textSecondary}
-                />
-                <Text style={styles.completionTitle}>Completitud del perfil</Text>
-              </View>
-              <Text style={styles.completionPct}>
-                {user.profileCompletion}%
-              </Text>
-            </View>
-            <View style={styles.progressBg}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${user.profileCompletion}%` },
-                ]}
-              />
-            </View>
-            <Text style={styles.completionHint}>
-              ¡Agrega más información para completar tu perfil!
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginHorizontal: theme.spacing.lg,
-              marginTop: theme.spacing.md,
-              paddingVertical: theme.spacing.md,
-              backgroundColor: "#FFF0F0",
-              borderWidth: 1,
-              borderColor: "#FFCDD2",
-              borderRadius: theme.radius.md,
-              gap: theme.spacing.xs,
-            }}
-            onPress={() => signOut()}
-          >
-            <Ionicons name="log-out-outline" size={18} color="#D32F2F" />
-            <Text
-              style={{
-                fontFamily: theme.typography.families.medium,
-                fontSize: theme.typography.sizes.sm,
-                color: "#D32F2F",
-              }}
-            >
-              Cerrar sesión
-            </Text>
-          </TouchableOpacity>
 
           <View style={{ height: theme.spacing.md }} />
         </ScrollView>
