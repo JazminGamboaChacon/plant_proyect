@@ -6,6 +6,7 @@ import {
 } from "@expo-google-fonts/inter";
 import { Lora_400Regular_Italic } from "@expo-google-fonts/lora";
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAuth, AuthProvider } from "../src/context/AuthContext";
 import { RegistrationProvider } from "../src/context/RegistrationContext";
 import { SyncProvider } from "../src/context/SyncContext";
@@ -44,14 +45,16 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <RegistrationProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
-        </RegistrationProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <AuthProvider>
+          <RegistrationProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </RegistrationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
