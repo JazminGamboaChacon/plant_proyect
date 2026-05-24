@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  FlatList,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,9 +21,12 @@ import Header from "../../src/componets/common/Header";
 import { useTheme } from "../../src/context/ThemeContext";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import { type ApiUser } from "../../src/services/api";
+import { Accelerometer } from "expo-sensors";
+import * as Haptics from "expo-haptics";
 import { getPendingPlants, markWateredToday } from "../../src/utils/careSchedule";
 import { getLunarPhase, getDailyTip, type LunarDay } from "../../src/utils/lunarPhase";
 import { LocalPlant } from "../../src/types-dtos/plant.types";
+import { recordCare } from "../../src/services/careService";
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CR", {
@@ -313,11 +318,17 @@ function PlantGrid({
 }
 
 // ── Pantalla principal ────────────────────────────────────────────────────────
+const SHAKE_THRESHOLD = 1.8;
+const COOLDOWN_MS = 2000;
+
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { plants, refresh } = usePlantStorage("user-1");
+  const { plants, refresh } = usePlantStorage(user?.id ?? "user-1");
   const [pendingIds, setPendingIds] = useState<string[]>([]);
+  const [showShakeModal, setShowShakeModal] = useState(false);
+  const [selectedPlantIds, setSelectedPlantIds] = useState<string[]>([]);
+  const cooldownRef = useRef(false);
   const lunar = getLunarPhase();
   const dailyTip = getDailyTip();
 
@@ -331,6 +342,17 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      Accelerometer.setUpdateInterval(100);
+      const sub = Accelerometer.addListener(({ x, y, z }) => {
+        const total = Math.sqrt(x * x + y * y + z * z);
+        if (total > SHAKE_THRESHOLD && !cooldownRef.current) {
+          cooldownRef.current = true;
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setShowShakeModal(true);
+          setTimeout(() => { cooldownRef.current = false; }, COOLDOWN_MS);
+        }
+      });
+      return () => sub.remove();
     }, [refresh])
   );
 
@@ -341,6 +363,27 @@ export default function HomeScreen() {
   const handleMarkDone = async (localId: string) => {
     await markWateredToday(localId);
     setPendingIds((prev) => prev.filter((id) => id !== localId));
+  };
+
+  const toggleSelection = (localId: string) => {
+    setSelectedPlantIds((prev) =>
+      prev.includes(localId) ? prev.filter((id) => id !== localId) : [...prev, localId]
+    );
+  };
+
+  const handleShakeConfirm = async () => {
+    const userId = user?.id ?? "user-1";
+    for (const localId of selectedPlantIds) {
+      const plant = plants.find((p) => p.localId === localId);
+      if (plant) await recordCare(plant, "riego", "shake", userId);
+    }
+    setShowShakeModal(false);
+    setSelectedPlantIds([]);
+    await refresh();
+    const ids = await getPendingPlants(
+      plants.map((p) => ({ localId: p.localId, watering: p.watering }))
+    );
+    setPendingIds(ids);
   };
 
   const pendingPlants = plants.filter((p) => pendingIds.includes(p.localId));
@@ -375,6 +418,74 @@ export default function HomeScreen() {
           <PlantGrid plants={plants} pendingIds={pendingIds} />
         </Animated.View>
       </ScrollView>
+
+      {/* Módulo 7 — Modal de sacudida */}
+      <Modal
+        visible={showShakeModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowShakeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.modalTitle, { color: theme.colors.textPrimary }]}>
+              ¿Qué planta regaste?
+            </Text>
+            {pendingPlants.length === 0 ? (
+              <Text style={[styles.modalEmpty, { color: theme.colors.textSecondary }]}>
+                No hay plantas con riego pendiente
+              </Text>
+            ) : (
+              <FlatList
+                data={pendingPlants}
+                keyExtractor={(item) => item.localId}
+                style={{ maxHeight: 300 }}
+                renderItem={({ item }) => {
+                  const selected = selectedPlantIds.includes(item.localId);
+                  return (
+                    <TouchableOpacity
+                      onPress={() => toggleSelection(item.localId)}
+                      style={[
+                        styles.modalPlantRow,
+                        { borderColor: theme.colors.border },
+                        selected && { borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryPale },
+                      ]}
+                    >
+                      <Image source={{ uri: item.localPhotoUri }} style={styles.modalPhoto} />
+                      <Text
+                        style={[styles.modalPlantName, { color: theme.colors.textPrimary }]}
+                        numberOfLines={1}
+                      >
+                        {item.commonName}
+                      </Text>
+                      {selected && (
+                        <Feather name="check" size={18} color={theme.colors.primary} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            )}
+            <View style={styles.modalBtns}>
+              <TouchableOpacity
+                onPress={() => { setShowShakeModal(false); setSelectedPlantIds([]); }}
+                style={[styles.modalCancelBtn, { borderColor: theme.colors.border }]}
+              >
+                <Text style={[styles.modalCancelText, { color: theme.colors.textSecondary }]}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleShakeConfirm}
+                style={[styles.modalConfirmBtn, { backgroundColor: theme.colors.primary }]}
+                disabled={selectedPlantIds.length === 0}
+              >
+                <Text style={styles.modalConfirmText}>Confirmar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -590,5 +701,76 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     fontWeight: "500",
+  },
+
+  // Shake modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 36,
+    gap: 16,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  modalEmpty: {
+    fontSize: 14,
+    textAlign: "center",
+    paddingVertical: 16,
+  },
+  modalPlantRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  modalPhoto: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: "#E8F5EE",
+  },
+  modalPlantName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  modalBtns: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  modalCancelText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  modalConfirmBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalConfirmText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });
