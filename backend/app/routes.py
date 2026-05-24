@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter
 
 from fastapi import HTTPException
@@ -9,6 +11,7 @@ from .models import (
     AuthResponse,
     GroupModel,
     LoginRequest,
+    PlantCareModel,
     PlantCreateModel,
     PlantModel,
     PlantTypeModel,
@@ -128,6 +131,12 @@ def update_plant(plant_id: str, payload: PlantUpdateModel) -> dict:
     data = payload.model_dump(exclude_none=True)
     if not data:
         raise HTTPException(status_code=400, detail="No fields to update.")
+    return update_document("plants", plant_id, data)
+
+
+@router.patch("/api/plants/{plant_id}/care")
+def update_plant_care(plant_id: str, care: PlantCareModel) -> dict:
+    data = {"care": care.model_dump(), "updatedAt": datetime.now(timezone.utc).isoformat()}
     return update_document("plants", plant_id, data)
 
 
