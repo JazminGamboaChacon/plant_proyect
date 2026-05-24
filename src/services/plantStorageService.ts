@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
-import { LocalPlant, LocalPlantDraft } from '../types-dtos/plant.types';
+import { LocalPlant, LocalPlantDraft, PlantCare } from '../types-dtos/plant.types';
 
 const STORAGE_KEY = '@bloomly_plants';
 const PHOTO_DIR = FileSystem.documentDirectory + 'bloomly_photos/';
@@ -76,6 +76,15 @@ export async function markSyncError(localId: string, error: string): Promise<voi
 export async function getPendingPlants(): Promise<LocalPlant[]> {
   const plants = await loadPlants();
   return plants.filter((p) => !p.synced);
+}
+
+export async function updatePlantCare(localId: string, care: PlantCare): Promise<void> {
+  const plants = await loadPlants();
+  const idx = plants.findIndex((p) => p.localId === localId);
+  if (idx !== -1) {
+    plants[idx] = { ...plants[idx], care };
+    await savePlants(plants);
+  }
 }
 
 export async function deletePlant(localId: string): Promise<void> {
