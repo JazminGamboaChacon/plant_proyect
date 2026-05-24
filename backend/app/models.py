@@ -144,3 +144,14 @@ class PlantCreateModel(BaseModel):
     notes: str = ""
 
 
+class PlantCareModel(BaseModel):
+    waterFreqDays: int = 3
+    lastWatered: str | None = None
+    fertilizeFreqDays: int = 30
+    lastFertilized: str | None = None
+    pruneFreqDays: int = 60
+    lastPruned: str | None = None
+    lightType: str = "mixto"
+    careNotes: str = ""
+
+
