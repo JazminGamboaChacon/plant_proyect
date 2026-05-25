@@ -164,7 +164,7 @@ export default function AddScreen() {
         commonName: result.commonName || "Planta desconocida",
         scientificName: result.scientificName || "",
         photoURL: null,
-        type: "unknown",
+        type: result.plantType || "other",
         groupId: "",
         isFavorite: false,
         notes: `Riego: ${result.watering}\nLuz: ${result.sunlight}\nSustrato: ${result.soil}`,
@@ -190,7 +190,7 @@ export default function AddScreen() {
       capturedPhoto.uri
     );
     const unlocked = await checkAndUnlock(user?.id ?? 'user-1').catch(() => []);
-    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
+    for (const label of unlocked) showToast(label, 'success');
     setShowModal(false);
     setCapturedPhoto(null);
     router.push('/(tabs)/explore');
