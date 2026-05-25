@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -17,16 +17,17 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "../../src/context/AuthContext";
+import { useToast } from "../../src/context/ToastContext";
 import Header from "../../src/componets/common/Header";
 import { useTheme } from "../../src/context/ThemeContext";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import { type ApiUser } from "../../src/services/api";
 import { Accelerometer } from "expo-sensors";
 import * as Haptics from "expo-haptics";
-import { getPendingPlants, markWateredToday } from "../../src/utils/careSchedule";
 import { getLunarPhase, getDailyTip, type LunarDay } from "../../src/utils/lunarPhase";
 import { LocalPlant } from "../../src/types-dtos/plant.types";
-import { recordCare } from "../../src/services/careService";
+import { recordCare, getPendingCareTypes } from "../../src/services/careService";
+import { checkAndUnlock } from "../../src/services/achievementService";
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CR", {
@@ -290,22 +291,14 @@ function PlantGrid({
                     <Text style={styles.plantName} numberOfLines={1}>
                       {plant.commonName}
                     </Text>
-                    <View style={styles.careDot}>
-                      <View
-                        style={[
-                          styles.dot,
-                          { backgroundColor: isPending ? "#F44336" : "#4CAF50" },
-                        ]}
-                      />
-                      <Text
-                        style={[
-                          styles.careLabel,
-                          { color: isPending ? "#F44336" : "#4CAF50" },
-                        ]}
-                      >
-                        {isPending ? "Riego: hoy" : "Próximamente"}
-                      </Text>
-                    </View>
+                    {isPending && (
+                      <View style={styles.careDot}>
+                        <View style={[styles.dot, { backgroundColor: "#F44336" }]} />
+                        <Text style={[styles.careLabel, { color: "#F44336" }]}>
+                          Riego: hoy
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               );
@@ -324,20 +317,13 @@ const COOLDOWN_MS = 2000;
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { plants, refresh } = usePlantStorage(user?.id ?? "user-1");
-  const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [showShakeModal, setShowShakeModal] = useState(false);
   const [selectedPlantIds, setSelectedPlantIds] = useState<string[]>([]);
   const cooldownRef = useRef(false);
   const lunar = getLunarPhase();
   const dailyTip = getDailyTip();
-
-  const loadPending = useCallback(async () => {
-    const ids = await getPendingPlants(
-      plants.map((p) => ({ localId: p.localId, watering: p.watering }))
-    );
-    setPendingIds(ids);
-  }, [plants]);
 
   useFocusEffect(
     useCallback(() => {
@@ -356,13 +342,11 @@ export default function HomeScreen() {
     }, [refresh])
   );
 
-  useEffect(() => {
-    if (plants.length > 0) loadPending();
-  }, [plants, loadPending]);
-
   const handleMarkDone = async (localId: string) => {
-    await markWateredToday(localId);
-    setPendingIds((prev) => prev.filter((id) => id !== localId));
+    const plant = plants.find((p) => p.localId === localId);
+    if (!plant) return;
+    await recordCare(plant, "riego", "manual", user?.id ?? "user-1");
+    await refresh();
   };
 
   const toggleSelection = (localId: string) => {
@@ -377,16 +361,15 @@ export default function HomeScreen() {
       const plant = plants.find((p) => p.localId === localId);
       if (plant) await recordCare(plant, "riego", "shake", userId);
     }
+    const unlocked = await checkAndUnlock(userId).catch(() => []);
+    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
     setShowShakeModal(false);
     setSelectedPlantIds([]);
     await refresh();
-    const ids = await getPendingPlants(
-      plants.map((p) => ({ localId: p.localId, watering: p.watering }))
-    );
-    setPendingIds(ids);
   };
 
-  const pendingPlants = plants.filter((p) => pendingIds.includes(p.localId));
+  const pendingPlants = plants.filter((p) => getPendingCareTypes(p).includes("riego"));
+  const pendingIds = pendingPlants.map((p) => p.localId);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -407,12 +390,14 @@ export default function HomeScreen() {
           <DailyTipCard tip={dailyTip} />
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(240).duration(400)}>
-          <CareSection
-            pendingPlants={pendingPlants}
-            onMarkDone={handleMarkDone}
-          />
-        </Animated.View>
+        {pendingPlants.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(240).duration(400)}>
+            <CareSection
+              pendingPlants={pendingPlants}
+              onMarkDone={handleMarkDone}
+            />
+          </Animated.View>
+        )}
 
         <Animated.View entering={FadeInDown.delay(320).duration(400)}>
           <PlantGrid plants={plants} pendingIds={pendingIds} />
