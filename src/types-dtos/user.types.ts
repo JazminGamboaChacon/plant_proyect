@@ -5,6 +5,7 @@ export type Category = {
   imageUrl: string;
   name: string;
   count: number;
+  icon: string;
 };
 
 export type Achievement = {
