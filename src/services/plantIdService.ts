@@ -19,6 +19,7 @@ export interface PlantIdentificationResult {
   watering: string;
   sunlight: string;
   soil: string;
+  plantType: string;
   care: GeminiCare;
 }
 
@@ -46,6 +47,7 @@ const PROMPT =
   '  "watering": "descripción del riego en español (ej: Moderado, 1-2 veces por semana)",\n' +
   '  "sunlight": "descripción de luz en español (ej: Luz indirecta brillante)",\n' +
   '  "soil": "tipo de sustrato en español (ej: Sustrato drenante con arena)",\n' +
+  '  "plantType": una de estas opciones exactas: "succulents" | "cacti" | "tropical" | "flowering" | "herbs" | "ferns" | "other",\n' +
   '  "care": {\n' +
   '    "wateringFrequencyDays": número entero de días entre riegos,\n' +
   '    "fertilizingFrequencyDays": número entero de días entre abonos,\n' +
@@ -132,6 +134,7 @@ export async function identifyPlant(
       watering: "",
       sunlight: "",
       soil: "",
+      plantType: "other",
       care: DEFAULT_CARE,
     };
   }
@@ -150,6 +153,7 @@ export async function identifyPlant(
     watering: String(parsed.watering ?? "No disponible"),
     sunlight: String(parsed.sunlight ?? "No disponible"),
     soil: String(parsed.soil ?? "No disponible"),
+    plantType: String(parsed.plantType ?? "other"),
     care: {
       wateringFrequencyDays: Number(
         rawCare.wateringFrequencyDays ?? DEFAULT_CARE.wateringFrequencyDays,
