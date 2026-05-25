@@ -17,6 +17,7 @@ from .models import (
     PlantTypeModel,
     RegisterRequest,
     PlantUpdateModel,
+    UnlockAchievementRequest,
     UserModel,
     UserProfileResponse,
     UserUpdateModel,
@@ -106,6 +107,26 @@ def read_user_achievements(user_id: str) -> list[dict]:
     )
     earned_ids = {ua["achievementId"] for ua in user_achievements}
     return [{**a, "earned": a["id"] in earned_ids} for a in all_achievements]
+
+
+@router.post("/api/users/{user_id}/achievements/unlock")
+def unlock_achievement(user_id: str, body: UnlockAchievementRequest) -> dict:
+    achievements = get_collection("achievements", filters=[("key", "==", body.achievementKey)])
+    if not achievements:
+        raise HTTPException(status_code=404, detail=f"Logro '{body.achievementKey}' no encontrado.")
+    achievement = achievements[0]
+    existing = get_collection(
+        "userAchievements",
+        filters=[("userId", "==", user_id), ("achievementId", "==", achievement["id"])],
+    )
+    if existing:
+        return {"alreadyEarned": True, **achievement}
+    create_document("userAchievements", {
+        "userId": user_id,
+        "achievementId": achievement["id"],
+        "unlockedAt": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"alreadyEarned": False, **achievement}
 
 
 @router.get("/api/plant-types", response_model=list[PlantTypeModel])
