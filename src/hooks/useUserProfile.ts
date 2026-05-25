@@ -3,7 +3,10 @@ import {
   ApiUserProfileResponse,
   fetchUserProfile,
 } from "../services/api";
+import { loadPlants } from "../services/plantStorageService";
+import { updateAppStreak } from "../services/streakService";
 import { UserProfileData } from "../types-dtos/user.types";
+import { LocalPlant } from "../types-dtos/plant.types";
 import type { Ionicons } from "@expo/vector-icons";
 import React from "react";
 
@@ -52,6 +55,7 @@ const ACHIEVEMENT_LABEL_MAP: Record<string, string> = {
   grid:    "Coleccionista",
 };
 
+
 function formatBirthday(value: string): string {
   if (!value || value.trim() === "") return "";
   let date: Date;
@@ -67,13 +71,15 @@ function formatBirthday(value: string): string {
   return date.toLocaleDateString("es-CR", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
+function mapApiToProfileData(api: ApiUserProfileResponse, localPlants: LocalPlant[]): UserProfileData {
   const { user, plants, plantTypes, achievements } = api;
 
-  // Build categories from plantTypes + plant count per type
+  // Count by type from local plants so new plants show immediately (no sync needed)
   const plantCountByType: Record<string, number> = {};
-  for (const p of plants) {
-    plantCountByType[p.type] = (plantCountByType[p.type] || 0) + 1;
+  for (const p of localPlants) {
+    if (p.type && p.type !== "other") {
+      plantCountByType[p.type] = (plantCountByType[p.type] || 0) + 1;
+    }
   }
 
   const categories = plantTypes.map((pt) => ({
@@ -132,6 +138,7 @@ export function useUserProfile(userId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchTrigger, setFetchTrigger] = useState(0);
+  const isFirstLoad = React.useRef(true);
 
   const refetch = () => {
     setFetchTrigger((n) => n + 1);
@@ -140,13 +147,16 @@ export function useUserProfile(userId: string) {
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
+    if (isFirstLoad.current) setLoading(true);
     setError(null);
 
-    fetchUserProfile(userId)
-      .then((apiData) => {
+    Promise.all([fetchUserProfile(userId), updateAppStreak(userId), loadPlants(userId)])
+      .then(([apiData, appStreak, localPlants]) => {
         if (!cancelled) {
-          setData(mapApiToProfileData(apiData));
+          const mapped = mapApiToProfileData(apiData, localPlants);
+          mapped.streak = appStreak;
+          mapped.plants = localPlants.length;
+          setData(mapped);
         }
       })
       .catch((err) => {
@@ -156,6 +166,7 @@ export function useUserProfile(userId: string) {
       })
       .finally(() => {
         if (!cancelled) {
+          isFirstLoad.current = false;
           setLoading(false);
         }
       });
