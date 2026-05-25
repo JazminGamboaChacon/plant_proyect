@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 from fastapi import APIRouter
@@ -60,23 +61,22 @@ def read_user(user_id: str) -> dict:
 
 @router.get("/api/users/{user_id}/profile", response_model=UserProfileResponse)
 def read_user_profile(user_id: str) -> dict:
-    user = get_document("users", user_id)
-    plants = get_collection("plants", filters=[("userId", "==", user_id)])
-    groups = get_collection("groups", filters=[("userId", "==", user_id)])
-    plant_types = get_collection("plantTypes")
+    with ThreadPoolExecutor() as executor:
+        f_user        = executor.submit(get_document,   "users",            user_id)
+        f_plants      = executor.submit(get_collection, "plants",           filters=[("userId", "==", user_id)])
+        f_groups      = executor.submit(get_collection, "groups",           filters=[("userId", "==", user_id)])
+        f_plant_types = executor.submit(get_collection, "plantTypes")
+        f_all_ach     = executor.submit(get_collection, "achievements")
+        f_user_ach    = executor.submit(get_collection, "userAchievements", filters=[("userId", "==", user_id)])
 
-    all_achievements = get_collection("achievements")
-    user_achievements = get_collection(
-        "userAchievements", filters=[("userId", "==", user_id)]
-    )
-    earned_ids = {ua["achievementId"] for ua in user_achievements}
-    achievements = [{**a, "earned": a["id"] in earned_ids} for a in all_achievements]
+    earned_ids   = {ua["achievementId"] for ua in f_user_ach.result()}
+    achievements = [{**a, "earned": a["id"] in earned_ids} for a in f_all_ach.result()]
 
     return {
-        "user": user,
-        "plants": plants,
-        "groups": groups,
-        "plantTypes": plant_types,
+        "user":         f_user.result(),
+        "plants":       f_plants.result(),
+        "groups":       f_groups.result(),
+        "plantTypes":   f_plant_types.result(),
         "achievements": achievements,
     }
 
