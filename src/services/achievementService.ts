@@ -5,12 +5,11 @@ import { getCareHistory } from './careService';
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8000';
 
 const ACHIEVEMENT_LABELS: Record<string, string> = {
-  primera_planta:    'Primera Planta',
-  coleccionista:     'Coleccionista',
-  explorador:        'Explorador',
-  en_racha:          'En Racha',
-  manos_a_la_tierra: 'Manos a la Tierra',
-  jardinero_florido: 'Jardinero Florido',
+  first_plant: 'Registraste tu primera planta',
+  green_thumb: 'Ya tienes 5 plantas en tu colección',
+  explorer:    'Identificaste tu primera planta con IA',
+  week_streak: 'Llevas 7 días cuidando tus plantas',
+  gardener:    'Realizaste 10 cuidados a tus plantas',
 };
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
@@ -80,12 +79,11 @@ export async function checkAndUnlock(userId: string): Promise<string[]> {
     const plants = allPlants;
 
     const toCheck: Array<{ key: string; condition: boolean }> = [
-      { key: 'primera_planta',     condition: plants.length >= 1 },
-      { key: 'coleccionista',      condition: plants.length >= 5 },
-      { key: 'explorador',         condition: plants.some((p) => (p.confidence ?? 0) > 0) },
-      { key: 'manos_a_la_tierra',  condition: history.some((e) => e.triggeredBy === 'shake') },
-      { key: 'en_racha',           condition: hasSevenConsecutiveDays(history) },
-      { key: 'jardinero_florido',  condition: history.length >= 10 },
+      { key: 'first_plant',  condition: plants.length >= 1 },
+      { key: 'green_thumb',  condition: plants.length >= 5 },
+      { key: 'explorer',     condition: plants.some((p) => (p.confidence ?? 0) > 0) },
+      { key: 'week_streak',  condition: hasSevenConsecutiveDays(history) },
+      { key: 'gardener',     condition: history.length >= 10 },
     ];
 
     const newlyUnlocked: string[] = [];
