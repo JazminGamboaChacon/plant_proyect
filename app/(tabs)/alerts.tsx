@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
+  Modal,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -11,9 +12,9 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import SunCalc from 'suncalc';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useAuth } from '../../src/context/AuthContext';
+import { useToast } from '../../src/context/ToastContext';
 import { usePlantStorage } from '../../src/hooks/usePlantStorage';
 import { getLunarPhase } from '../../src/utils/lunarPhase';
 import {
@@ -22,6 +23,7 @@ import {
   getCareHistory,
 } from '../../src/services/careService';
 import { requestNotificationPermissions } from '../../src/services/notificationService';
+import { checkAndUnlock } from '../../src/services/achievementService';
 import Header from '../../src/componets/common/Header';
 import { CareHistoryEntry, CareType, LocalPlant } from '../../src/types-dtos/plant.types';
 
@@ -37,13 +39,13 @@ const CARE_LABEL: Record<CareType, string> = {
   poda:  'Poda',
 };
 
-function moonDotColor(date: Date): string {
-  const { phase } = SunCalc.getMoonIllumination(date);
-  if (phase < 0.063 || phase > 0.937) return '#888';
-  if (phase < 0.437) return '#A0C4FF';
-  if (phase < 0.563) return '#FFD700';
-  return '#C0A0FF';
-}
+const CARE_DOT_COLOR: Record<CareType, string> = {
+  riego: '#3B9BDB',
+  abono: '#FF9800',
+  poda:  '#8B6914',
+};
+
+type DayCareEntry = { plant: LocalPlant; careType: CareType };
 
 function isFavorable(careType: CareType, phaseName: string): boolean {
   const rules: Record<CareType, string[]> = {
@@ -62,6 +64,7 @@ function formatDate(iso: string): string {
 export default function AlertsScreen() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const { plants, isLoading, refresh } = usePlantStorage(user?.id ?? '');
 
   const today = new Date();
@@ -69,6 +72,7 @@ export default function AlertsScreen() {
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [history, setHistory] = useState<CareHistoryEntry[]>([]);
   const [markingPlant, setMarkingPlant] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const phase = getLunarPhase(today);
 
@@ -95,6 +99,8 @@ export default function AlertsScreen() {
     setMarkingPlant(plant.localId + careType);
     await recordCare(plant, careType, 'manual', user.id);
     await refresh();
+    const unlocked = await checkAndUnlock(user.id).catch(() => []);
+    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
     await loadHistory();
     setMarkingPlant(null);
   };
@@ -112,6 +118,28 @@ export default function AlertsScreen() {
       })
       .map((e) => new Date(e.doneAt).getDate()),
   );
+
+  // Próximos cuidados por día del mes visible (con referencia a la planta)
+  const nextCareDays = new Map<number, DayCareEntry[]>();
+  for (const plant of plants) {
+    const care = plant.care;
+    const items: Array<{ lastDate: string | null; freqDays: number; type: CareType }> = [
+      { lastDate: care?.lastWatered    ?? null, freqDays: care?.waterFreqDays    ?? 3,  type: 'riego' },
+      { lastDate: care?.lastFertilized ?? null, freqDays: care?.fertilizeFreqDays ?? 30, type: 'abono' },
+      { lastDate: care?.lastPruned     ?? null, freqDays: care?.pruneFreqDays    ?? 60, type: 'poda'  },
+    ];
+    for (const { lastDate, freqDays, type } of items) {
+      const nextDate = lastDate
+        ? new Date(new Date(lastDate).getTime() + freqDays * 86_400_000)
+        : new Date(today);
+      if (nextDate.getFullYear() === viewYear && nextDate.getMonth() === viewMonth) {
+        const day = nextDate.getDate();
+        const arr = nextCareDays.get(day) ?? [];
+        arr.push({ plant, careType: type });
+        nextCareDays.set(day, arr);
+      }
+    }
+  }
 
   const cells: Array<number | null> = [
     ...Array(offset).fill(null),
@@ -176,21 +204,36 @@ export default function AlertsScreen() {
             <View key={ri} style={s.dayRow}>
               {row.map((day, ci) => {
                 if (!day) return <View key={ci} style={s.dayCell} />;
-                const cellDate = new Date(viewYear, viewMonth, day);
-                const dotColor = moonDotColor(cellDate);
                 const isToday =
                   day === today.getDate() &&
                   viewMonth === today.getMonth() &&
                   viewYear === today.getFullYear();
                 const hasCare = doneDays.has(day);
+                const upcomingEntries = nextCareDays.get(day);
+                const upcomingTypes = upcomingEntries
+                  ? new Set(upcomingEntries.map((e) => e.careType))
+                  : undefined;
                 return (
-                  <View key={ci} style={s.dayCell}>
+                  <TouchableOpacity
+                    key={ci}
+                    style={s.dayCell}
+                    onPress={() => setSelectedDay(day)}
+                    activeOpacity={0.7}
+                  >
                     <View style={[s.dayBg, isToday && { backgroundColor: theme.colors.primary }]}>
                       <Text style={[s.dayNum, isToday && { color: '#fff' }]}>{day}</Text>
                     </View>
-                    <View style={[s.moonDot, { backgroundColor: dotColor }]} />
-                    {hasCare && <View style={s.careDot} />}
-                  </View>
+                    {/* Puntos de próximos cuidados */}
+                    {upcomingTypes && (
+                      <View style={s.upcomingRow}>
+                        {upcomingTypes.has('riego') && <View style={[s.upcomingDot, { backgroundColor: '#3B9BDB' }]} />}
+                        {upcomingTypes.has('abono') && <View style={[s.upcomingDot, { backgroundColor: '#FF9800' }]} />}
+                        {upcomingTypes.has('poda')  && <View style={[s.upcomingDot, { backgroundColor: '#8B6914' }]} />}
+                      </View>
+                    )}
+                    {/* Punto de cuidado ya registrado */}
+                    {hasCare && !upcomingTypes && <View style={s.careDot} />}
+                  </TouchableOpacity>
                 );
               })}
             </View>
@@ -198,20 +241,16 @@ export default function AlertsScreen() {
 
           <View style={s.legend}>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#888' }]} />
-              <Text style={s.legendText}>Nueva</Text>
+              <View style={[s.legendDot, { backgroundColor: '#3B9BDB' }]} />
+              <Text style={s.legendText}>Riego</Text>
             </View>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#A0C4FF' }]} />
-              <Text style={s.legendText}>Creciente</Text>
+              <View style={[s.legendDot, { backgroundColor: '#FF9800' }]} />
+              <Text style={s.legendText}>Abono</Text>
             </View>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#FFD700' }]} />
-              <Text style={s.legendText}>Llena</Text>
-            </View>
-            <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#C0A0FF' }]} />
-              <Text style={s.legendText}>Menguante</Text>
+              <View style={[s.legendDot, { backgroundColor: '#8B6914' }]} />
+              <Text style={s.legendText}>Poda</Text>
             </View>
           </View>
         </View>
@@ -279,11 +318,9 @@ export default function AlertsScreen() {
             <Text style={s.emptyText}>Sin registros aun</Text>
           </View>
         ) : (
-          history.slice(0, 5).map((entry) => {
-            const dotColor = moonDotColor(new Date(entry.doneAt));
-            return (
+          history.slice(0, 5).map((entry) => (
               <View key={entry.id} style={s.historyRow}>
-                <View style={[s.historyDot, { backgroundColor: dotColor }]} />
+                <View style={[s.historyDot, { backgroundColor: CARE_DOT_COLOR[entry.careType] }]} />
                 <View style={s.historyInfo}>
                   <Text style={s.historyName} numberOfLines={1}>{entry.plantName}</Text>
                   <Text style={s.historyMeta}>
@@ -292,12 +329,56 @@ export default function AlertsScreen() {
                 </View>
                 <Text style={s.historyPhase}>{entry.lunarPhase}</Text>
               </View>
-            );
-          })
+          ))
         )}
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* Modal de detalle del día */}
+      <Modal
+        visible={selectedDay !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedDay(null)}
+      >
+        <TouchableOpacity
+          style={s.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setSelectedDay(null)}
+        >
+          <View style={s.modalSheet} onStartShouldSetResponder={() => true}>
+            <Text style={s.modalTitle}>
+              {selectedDay} de {MONTH_NAMES[viewMonth]}
+            </Text>
+            {(() => {
+              const entries = selectedDay !== null ? (nextCareDays.get(selectedDay) ?? []) : [];
+              if (entries.length === 0) {
+                return (
+                  <Text style={s.modalEmpty}>No hay cuidados programados para este dia</Text>
+                );
+              }
+              return entries.map((entry, idx) => (
+                <View key={idx} style={s.modalRow}>
+                  <Image source={{ uri: entry.plant.localPhotoUri }} style={s.modalPhoto} />
+                  <View style={s.modalInfo}>
+                    <Text style={s.modalPlantName} numberOfLines={1}>{entry.plant.commonName}</Text>
+                    <View style={[s.pill, { backgroundColor: theme.colors.primaryPale, alignSelf: 'flex-start' }]}>
+                      <Text style={[s.pillText, { color: theme.colors.primary }]}>
+                        {CARE_LABEL[entry.careType]}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={[s.modalTypeDot, { backgroundColor: CARE_DOT_COLOR[entry.careType] }]} />
+                </View>
+              ));
+            })()}
+            <TouchableOpacity style={s.modalCloseBtn} onPress={() => setSelectedDay(null)}>
+              <Text style={s.modalCloseTxt}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -373,18 +454,22 @@ function styles(theme: ReturnType<typeof import('../../src/context/ThemeContext'
       fontSize: theme.typography.sizes.xs,
       color: theme.colors.textPrimary,
     },
-    moonDot: {
-      width: 5,
-      height: 5,
-      borderRadius: 3,
-      marginTop: 2,
-    },
     careDot: {
       width: 4,
       height: 4,
       borderRadius: 2,
       backgroundColor: '#2D7A4F',
       marginTop: 1,
+    },
+    upcomingRow: {
+      flexDirection: 'row',
+      gap: 2,
+      marginTop: 1,
+    },
+    upcomingDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
     },
     legend: {
       flexDirection: 'row',
@@ -509,6 +594,68 @@ function styles(theme: ReturnType<typeof import('../../src/context/ThemeContext'
       fontFamily: theme.typography.families.regular,
       fontSize: theme.typography.sizes.xs,
       color: theme.colors.textSecondary,
+    },
+
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.45)',
+      justifyContent: 'flex-end',
+    },
+    modalSheet: {
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: theme.radius.lg,
+      borderTopRightRadius: theme.radius.lg,
+      padding: 20,
+      maxHeight: '70%',
+    },
+    modalTitle: {
+      fontFamily: theme.typography.families.bold,
+      fontSize: theme.typography.sizes.md,
+      color: theme.colors.textPrimary,
+      marginBottom: 16,
+    },
+    modalEmpty: {
+      fontFamily: theme.typography.families.regular,
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+      paddingVertical: 24,
+    },
+    modalRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 12,
+    },
+    modalPhoto: {
+      width: 44,
+      height: 44,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.border,
+    },
+    modalInfo: { flex: 1, gap: 4 },
+    modalPlantName: {
+      fontFamily: theme.typography.families.medium,
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textPrimary,
+    },
+    modalTypeDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+    },
+    modalCloseBtn: {
+      marginTop: 16,
+      alignSelf: 'center',
+      paddingHorizontal: 24,
+      paddingVertical: 10,
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.radius.full,
+    },
+    modalCloseTxt: {
+      color: '#fff',
+      fontFamily: theme.typography.families.medium,
+      fontSize: theme.typography.sizes.sm,
     },
   });
 }
