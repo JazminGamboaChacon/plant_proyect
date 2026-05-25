@@ -18,6 +18,9 @@ export const createStyles = (theme: AppTheme) =>
       borderRadius: theme.radius.full,
       overflow: "hidden",
       marginBottom: theme.spacing.sm,
+      backgroundColor: theme.colors.primaryLight,
+      alignItems: "center",
+      justifyContent: "center",
     },
     categoryImage: {
       width: "100%",
