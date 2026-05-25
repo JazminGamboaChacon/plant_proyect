@@ -16,6 +16,8 @@ import { useTheme } from "../../src/context/ThemeContext";
 import { useAuth } from "../../src/context/AuthContext";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import { LocalPlant } from "../../src/types-dtos/plant.types";
+import Header from "../../src/componets/common/Header";
+import MonsteraLoader from "../../src/componets/common/MonsteraLoader";
 
 function ToxicityBadge({ value }: { value: string }) {
   if (!value || value === "No disponible") return null;
@@ -128,8 +130,17 @@ export default function ExploreScreen() {
       )
     : plants;
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: '#08200F' }]}>
+        <MonsteraLoader />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: t.background }]}>
+      <Header />
       <View style={[styles.header, { borderBottomColor: t.border }]}>
         <Text style={[styles.title, { color: t.textPrimary }]}>Mi Colección</Text>
         {plants.length > 0 && (
