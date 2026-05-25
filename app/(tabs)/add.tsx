@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
+import { router } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
@@ -18,18 +19,23 @@ import CameraPermissionModal from "../../src/componets/common/CameraPermissionMo
 import CameraPermissionScreen from "../../src/componets/common/CameraPermissionScreen";
 import PlantIdentificationModal from "../../src/componets/PlantIdentificationModal";
 import { useTheme } from "../../src/context/ThemeContext";
+import { useAuth } from "../../src/context/AuthContext";
+import { useToast } from "../../src/context/ToastContext";
 import { useCamera } from "../../src/hooks/useCamera";
 import { PhotoResult } from "../../src/services/cameraService";
 import {
   identifyPlant,
   PlantIdentificationResult,
 } from "../../src/services/plantIdService";
+import { checkAndUnlock } from "../../src/services/achievementService";
 
 const CAMERA_PERM_KEY = "@camera_perm_asked";
 
 export default function AddScreen() {
   const { theme } = useTheme();
-  const { savePlant } = usePlantStorage("user-1");
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const { savePlant } = usePlantStorage(user?.id ?? "user-1");
   const {
     cameraRef,
     permissions,
@@ -170,11 +176,24 @@ export default function AddScreen() {
         sunlight: result.sunlight,
         soil: result.soil,
         createdAt: new Date().toISOString(),
+        care: {
+          waterFreqDays:     result.care.wateringFrequencyDays,
+          lastWatered:       null,
+          fertilizeFreqDays: result.care.fertilizingFrequencyDays,
+          lastFertilized:    null,
+          pruneFreqDays:     result.care.pruningFrequencyDays,
+          lastPruned:        null,
+          lightType:         result.care.sunlight,
+          careNotes:         result.care.careNotes,
+        },
       },
       capturedPhoto.uri
     );
+    const unlocked = await checkAndUnlock(user?.id ?? 'user-1').catch(() => []);
+    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
     setShowModal(false);
     setCapturedPhoto(null);
+    router.push('/(tabs)/explore');
   };
 
   if (isCheckingPermissions || isLoadingPermissions) {
