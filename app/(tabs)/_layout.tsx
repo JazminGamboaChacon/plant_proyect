@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSync } from "../../src/context/SyncContext";
 import { useTheme } from "../../src/context/ThemeContext";
 
@@ -18,6 +18,7 @@ export default function TabLayout() {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
+          height: 68,
         },
         tabBarLabelStyle: {
           fontSize: theme.typography.sizes.xs,
@@ -55,23 +56,23 @@ export default function TabLayout() {
         name="add"
         options={{
           title: "Agregar",
-          tabBarIcon: ({ color }) => (
-            <View>
-              <Ionicons
-                name="add-circle-outline"
-                size={theme.iconSize.xl}
-                color={color}
-              />
-              {pendingCount > 0 && (
-                <View
-                  style={[styles.badge, { backgroundColor: theme.colors.error }]}
-                >
-                  <Text style={styles.badgeText}>
-                    {pendingCount > 9 ? "9+" : String(pendingCount)}
-                  </Text>
-                </View>
-              )}
-            </View>
+          tabBarLabel: () => null,
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...props}
+              style={{ flex: 1, alignItems: "center", justifyContent: "center", top: -18 }}
+            >
+              <View style={styles.addBtn}>
+                <Ionicons name="add" size={30} color="#fff" />
+                {pendingCount > 0 && (
+                  <View style={[styles.badge, { backgroundColor: theme.colors.error }]}>
+                    <Text style={styles.badgeText}>
+                      {pendingCount > 9 ? "9+" : String(pendingCount)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </TouchableOpacity>
           ),
         }}
       />
@@ -106,10 +107,23 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  addBtn: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#4A8A6A",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   badge: {
     position: "absolute",
-    top: -4,
-    right: -6,
+    top: -2,
+    right: -2,
     minWidth: 16,
     height: 16,
     borderRadius: 8,

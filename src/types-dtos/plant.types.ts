@@ -1,3 +1,27 @@
+export interface PlantCare {
+  waterFreqDays: number;
+  lastWatered: string | null;
+  fertilizeFreqDays: number;
+  lastFertilized: string | null;
+  pruneFreqDays: number;
+  lastPruned: string | null;
+  lightType: 'sol' | 'sombra' | 'mixto';
+  careNotes: string;
+}
+
+export type CareType = 'riego' | 'abono' | 'poda';
+
+export interface CareHistoryEntry {
+  id: string;
+  userId: string;
+  plantId: string;
+  plantName: string;
+  careType: CareType;
+  doneAt: string;
+  lunarPhase: string;
+  triggeredBy: 'manual' | 'shake' | 'notification';
+}
+
 export interface LocalPlant {
   localId: string;
   serverId: string | null;
@@ -20,6 +44,7 @@ export interface LocalPlant {
   createdAt: string;
   synced: boolean;
   syncError: string | null;
+  care?: PlantCare;
 }
 
 export type LocalPlantDraft = Omit<LocalPlant, 'localId' | 'serverId' | 'synced' | 'syncError'>;

@@ -3,7 +3,10 @@ import {
   ApiUserProfileResponse,
   fetchUserProfile,
 } from "../services/api";
+import { loadPlants } from "../services/plantStorageService";
+import { updateAppStreak } from "../services/streakService";
 import { UserProfileData } from "../types-dtos/user.types";
+import { LocalPlant } from "../types-dtos/plant.types";
 import type { Ionicons } from "@expo/vector-icons";
 import React from "react";
 
@@ -23,7 +26,9 @@ const PLANT_TYPE_IMAGES: Record<string, string> = {
   tropical:
     "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=200&h=200&fit=crop",
   flowering:
-    "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop",
+    "https://images.unsplash.com/photo-1471086569966-db3eebc25a59?w=200&h=200&fit=crop",
+  flower:
+    "https://images.unsplash.com/photo-1471086569966-db3eebc25a59?w=200&h=200&fit=crop",
   herbs:
     "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop",
   cacti:
@@ -31,6 +36,25 @@ const PLANT_TYPE_IMAGES: Record<string, string> = {
   ferns:
     "https://images.unsplash.com/photo-1597305877032-0668b3c6413a?w=200&h=200&fit=crop",
 };
+
+const PLANT_TYPE_LABELS: Record<string, string> = {
+  succulents: "Suculentas",
+  tropical:   "Tropicales",
+  flowering:  "Flores",
+  flower:     "Flores",
+  herbs:      "Hierbas",
+  cacti:      "Cactus",
+  ferns:      "Helechos",
+};
+
+const ACHIEVEMENT_LABEL_MAP: Record<string, string> = {
+  leaf:    "Primera Planta",
+  flower:  "Jardinero Florido",
+  flame:   "En Racha",
+  compass: "Explorador",
+  grid:    "Coleccionista",
+};
+
 
 function formatBirthday(value: string): string {
   if (!value || value.trim() === "") return "";
@@ -47,25 +71,28 @@ function formatBirthday(value: string): string {
   return date.toLocaleDateString("es-CR", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
+function mapApiToProfileData(api: ApiUserProfileResponse, localPlants: LocalPlant[]): UserProfileData {
   const { user, plants, plantTypes, achievements } = api;
 
-  // Build categories from plantTypes + plant count per type
+  // Count by type from local plants so new plants show immediately (no sync needed)
   const plantCountByType: Record<string, number> = {};
-  for (const p of plants) {
-    plantCountByType[p.type] = (plantCountByType[p.type] || 0) + 1;
+  for (const p of localPlants) {
+    if (p.type && p.type !== "other") {
+      plantCountByType[p.type] = (plantCountByType[p.type] || 0) + 1;
+    }
   }
 
   const categories = plantTypes.map((pt) => ({
     imageUrl: PLANT_TYPE_IMAGES[pt.id] || "",
-    name: pt.label,
+    name: PLANT_TYPE_LABELS[pt.id] || pt.label,
     count: plantCountByType[pt.id] || 0,
+    icon: pt.icon,
   }));
 
   // Map achievements
   const mappedAchievements = achievements.map((a) => ({
     iconName: (ICON_MAP[a.icon] || "help-outline") as IoniconsName,
-    label: a.label,
+    label: ACHIEVEMENT_LABEL_MAP[a.icon] || a.label,
     earned: a.earned,
   }));
 
@@ -90,17 +117,6 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     photoURL: p.photoURL,
   }));
 
-  // Profile completion: count filled fields
-  const fields = [
-    user.fullName,
-    user.email,
-    user.username,
-    user.birthday,
-    user.photoURL,
-  ];
-  const filled = fields.filter((f) => f !== null && f !== "").length;
-  const profileCompletion = Math.round((filled / fields.length) * 100);
-
   return {
     name: user.fullName,
     handle: `@${user.username}`,
@@ -108,12 +124,10 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     bio: user.bio || "",
     birthday: formatBirthday(user.birthday),
     streak: user.stats.daysActive,
-    friends: 0,
     plants: user.stats.totalPlants,
     favoritePlant,
     categories,
     achievements: mappedAchievements,
-    profileCompletion,
     plantOfTheDay: null,
     plantsList,
   };
@@ -124,6 +138,7 @@ export function useUserProfile(userId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fetchTrigger, setFetchTrigger] = useState(0);
+  const isFirstLoad = React.useRef(true);
 
   const refetch = () => {
     setFetchTrigger((n) => n + 1);
@@ -132,13 +147,16 @@ export function useUserProfile(userId: string) {
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
+    if (isFirstLoad.current) setLoading(true);
     setError(null);
 
-    fetchUserProfile(userId)
-      .then((apiData) => {
+    Promise.all([fetchUserProfile(userId), updateAppStreak(userId), loadPlants(userId)])
+      .then(([apiData, appStreak, localPlants]) => {
         if (!cancelled) {
-          setData(mapApiToProfileData(apiData));
+          const mapped = mapApiToProfileData(apiData, localPlants);
+          mapped.streak = appStreak;
+          mapped.plants = localPlants.length;
+          setData(mapped);
         }
       })
       .catch((err) => {
@@ -148,6 +166,7 @@ export function useUserProfile(userId: string) {
       })
       .finally(() => {
         if (!cancelled) {
+          isFirstLoad.current = false;
           setLoading(false);
         }
       });

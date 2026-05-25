@@ -1,12 +1,13 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect } from "react";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import Svg, { Circle, Ellipse } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Divider from "../../componets/common/Divider";
 import Header from "../../componets/common/Header";
+import MonsteraLoader from "../../componets/common/MonsteraLoader";
 import AchievementBadge from "../../componets/ui/AchievementBadge";
 import CategoryButton from "../../componets/ui/CategoryButton";
 import ProfileInfoCard from "../../componets/ui/ProfileInfoCard";
@@ -89,18 +90,18 @@ function FlowerAvatar({ uri, fallbackColor }: { uri: string | null; fallbackColo
 }
 
 export default function UserProfile() {
-  const { user: authUser, signOut } = useAuth();
+  const { user: authUser } = useAuth();
   const { data: user, loading, error, refetch } = useUserProfile(authUser?.id ?? "");
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const router = useRouter();
 
+  useFocusEffect(useCallback(() => { refetch(); }, [refetch]));
+
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: '#08200F' }]}>
+        <MonsteraLoader />
       </SafeAreaView>
     );
   }
@@ -186,7 +187,7 @@ export default function UserProfile() {
                 <Text style={styles.bioText}>{user.bio}</Text>
               </View>
             ) : null}
-            <View style={{ paddingHorizontal: theme.spacing.lg, alignSelf: "stretch" }}>
+            <View style={{ alignSelf: "stretch", marginTop: theme.spacing.md }}>
               <ProfileInfoCard
                 icon="cake-variant"
                 label="Cumpleaños"
@@ -211,18 +212,6 @@ export default function UserProfile() {
               value={String(user.streak)}
               label="Racha"
               iconBg={theme.colors.peach}
-            />
-            <StatCard
-              icon={
-                <Ionicons
-                  name="people-outline"
-                  size={theme.iconSize.md}
-                  color={theme.colors.textPrimary}
-                />
-              }
-              value={String(user.friends)}
-              label="Amigos"
-              iconBg={theme.colors.primaryLight}
             />
             <StatCard
               icon={
@@ -318,157 +307,6 @@ export default function UserProfile() {
           </View>
 
           <Divider />
-
-          {/* Mis Plantas */}
-          {user.plantsList.length > 0 && (
-            <>
-              <View style={styles.sectionHeader}>
-                <MaterialCommunityIcons
-                  name="sprout"
-                  size={theme.iconSize.sm}
-                  color={theme.colors.textSecondary}
-                />
-                <Text style={styles.sectionTitle}>MIS PLANTAS</Text>
-              </View>
-              <View style={{ paddingHorizontal: theme.spacing.lg, gap: theme.spacing.sm, marginBottom: theme.spacing.xs }}>
-                {user.plantsList.map((plant) => (
-                  <TouchableOpacity
-                    key={plant.id}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: theme.colors.surface,
-                      borderWidth: 1,
-                      borderColor: theme.colors.border,
-                      borderRadius: theme.radius.lg,
-                      padding: theme.spacing.md,
-                      gap: theme.spacing.md,
-                    }}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/edit-plant" as any,
-                        params: { plantId: plant.id },
-                      })
-                    }
-                  >
-                    {plant.photoURL ? (
-                      <Image
-                        source={{ uri: plant.photoURL }}
-                        style={{ width: 48, height: 48, borderRadius: theme.radius.md }}
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: theme.radius.md,
-                          backgroundColor: theme.colors.primaryLight,
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name="flower"
-                          size={24}
-                          color={theme.colors.primary}
-                        />
-                      </View>
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontFamily: theme.typography.families.medium,
-                          fontSize: theme.typography.sizes.md,
-                          color: theme.colors.textPrimary,
-                        }}
-                      >
-                        {plant.commonName}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: theme.typography.families.scientific,
-                          fontSize: theme.typography.sizes.sm,
-                          color: theme.colors.textSecondary,
-                          fontStyle: "italic",
-                        }}
-                      >
-                        {plant.scientificName}
-                      </Text>
-                    </View>
-                    {plant.isFavorite && (
-                      <Ionicons
-                        name="heart"
-                        size={16}
-                        color={theme.colors.primary}
-                      />
-                    )}
-                    <Feather
-                      name="edit-2"
-                      size={16}
-                      color={theme.colors.textSecondary}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Divider />
-            </>
-          )}
-
-          {/* Completitud */}
-          <View style={styles.completionCard}>
-            <View style={styles.completionTop}>
-              <View style={styles.completionTitleRow}>
-                <Ionicons
-                  name="person-circle-outline"
-                  size={theme.iconSize.md}
-                  color={theme.colors.textSecondary}
-                />
-                <Text style={styles.completionTitle}>Completitud del perfil</Text>
-              </View>
-              <Text style={styles.completionPct}>
-                {user.profileCompletion}%
-              </Text>
-            </View>
-            <View style={styles.progressBg}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${user.profileCompletion}%` },
-                ]}
-              />
-            </View>
-            <Text style={styles.completionHint}>
-              ¡Agrega más información para completar tu perfil!
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginHorizontal: theme.spacing.lg,
-              marginTop: theme.spacing.md,
-              paddingVertical: theme.spacing.md,
-              backgroundColor: "#FFF0F0",
-              borderWidth: 1,
-              borderColor: "#FFCDD2",
-              borderRadius: theme.radius.md,
-              gap: theme.spacing.xs,
-            }}
-            onPress={() => signOut()}
-          >
-            <Ionicons name="log-out-outline" size={18} color="#D32F2F" />
-            <Text
-              style={{
-                fontFamily: theme.typography.families.medium,
-                fontSize: theme.typography.sizes.sm,
-                color: "#D32F2F",
-              }}
-            >
-              Cerrar sesión
-            </Text>
-          </TouchableOpacity>
 
           <View style={{ height: theme.spacing.md }} />
         </ScrollView>
