@@ -28,6 +28,7 @@ import { getLunarPhase, getDailyTip, type LunarDay } from "../../src/utils/lunar
 import { LocalPlant } from "../../src/types-dtos/plant.types";
 import { recordCare, getPendingCareTypes } from "../../src/services/careService";
 import { checkAndUnlock } from "../../src/services/achievementService";
+import { updateAppStreak } from "../../src/services/streakService";
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("es-CR", {
@@ -68,8 +69,7 @@ const STARS = [
 ];
 
 // ── Sección 1: Saludo ─────────────────────────────────────────────────────────
-function GreetingCard({ user }: { user: ApiUser | null }) {
-  const streak = user?.stats?.daysActive ?? 0;
+function GreetingCard({ user, streak }: { user: ApiUser | null; streak: number }) {
   const initial = (user?.fullName ?? user?.username ?? "U")[0].toUpperCase();
   const today = new Date();
 
@@ -101,12 +101,20 @@ function GreetingCard({ user }: { user: ApiUser | null }) {
           <Text style={styles.streakPillText}>{streak}</Text>
         </View>
       </View>
-      {/* Tip motivacional si racha es 0 */}
+      {/* Tip motivacional */}
       {streak === 0 && (
         <View style={styles.motivTip}>
           <Feather name="info" size={13} color="#2D7A4F" />
           <Text style={styles.motivText}>
-            Registra un cuidado hoy para iniciar tu racha
+            Abre la app cada día para mantener tu racha
+          </Text>
+        </View>
+      )}
+      {streak === 1 && (
+        <View style={styles.motivTip}>
+          <Feather name="zap" size={13} color="#E65100" />
+          <Text style={styles.motivText}>
+            Llevas 1 día seguido, vuelve mañana para sumar
           </Text>
         </View>
       )}
@@ -166,18 +174,13 @@ function DailyTipCard({ tip }: { tip: string }) {
 // ── Sección 4: Cuidados ───────────────────────────────────────────────────────
 function CareSection({
   pendingPlants,
-  onMarkDone,
 }: {
   pendingPlants: LocalPlant[];
-  onMarkDone: (id: string) => void;
 }) {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Cuidados pendientes</Text>
-        <TouchableOpacity onPress={() => router.push("/(tabs)/explore" as any)}>
-          <Text style={styles.sectionLink}>Ver todos →</Text>
-        </TouchableOpacity>
       </View>
 
       {pendingPlants.length === 0 ? (
@@ -212,12 +215,6 @@ function CareSection({
                 <Text style={styles.careTypePillText}>Riego</Text>
               </View>
             </View>
-            <TouchableOpacity
-              onPress={() => onMarkDone(plant.localId)}
-              style={styles.doneBtn}
-            >
-              <Feather name="check" size={18} color="#fff" />
-            </TouchableOpacity>
           </View>
         ))
       )}
@@ -228,10 +225,8 @@ function CareSection({
 // ── Sección 5: Grid de plantas ────────────────────────────────────────────────
 function PlantGrid({
   plants,
-  pendingIds,
 }: {
   plants: LocalPlant[];
-  pendingIds: string[];
 }) {
   const { width } = useWindowDimensions();
   const cardW = (width - 16 * 2 - 8) / 2;
@@ -266,7 +261,6 @@ function PlantGrid({
         rows.map((row, ri) => (
           <View key={ri} style={styles.gridRow}>
             {row.map((plant) => {
-              const isPending = pendingIds.includes(plant.localId);
               return (
                 <TouchableOpacity
                   key={plant.localId}
@@ -291,14 +285,6 @@ function PlantGrid({
                     <Text style={styles.plantName} numberOfLines={1}>
                       {plant.commonName}
                     </Text>
-                    {isPending && (
-                      <View style={styles.careDot}>
-                        <View style={[styles.dot, { backgroundColor: "#F44336" }]} />
-                        <Text style={[styles.careLabel, { color: "#F44336" }]}>
-                          Riego: hoy
-                        </Text>
-                      </View>
-                    )}
                   </View>
                 </TouchableOpacity>
               );
@@ -321,6 +307,7 @@ export default function HomeScreen() {
   const { plants, refresh } = usePlantStorage(user?.id ?? "user-1");
   const [showShakeModal, setShowShakeModal] = useState(false);
   const [selectedPlantIds, setSelectedPlantIds] = useState<string[]>([]);
+  const [streak, setStreak] = useState(0);
   const cooldownRef = useRef(false);
   const lunar = getLunarPhase();
   const dailyTip = getDailyTip();
@@ -328,6 +315,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      updateAppStreak(user?.id ?? "user-1").then(setStreak);
       Accelerometer.setUpdateInterval(100);
       const sub = Accelerometer.addListener(({ x, y, z }) => {
         const total = Math.sqrt(x * x + y * y + z * z);
@@ -342,13 +330,6 @@ export default function HomeScreen() {
     }, [refresh])
   );
 
-  const handleMarkDone = async (localId: string) => {
-    const plant = plants.find((p) => p.localId === localId);
-    if (!plant) return;
-    await recordCare(plant, "riego", "manual", user?.id ?? "user-1");
-    await refresh();
-  };
-
   const toggleSelection = (localId: string) => {
     setSelectedPlantIds((prev) =>
       prev.includes(localId) ? prev.filter((id) => id !== localId) : [...prev, localId]
@@ -362,14 +343,13 @@ export default function HomeScreen() {
       if (plant) await recordCare(plant, "riego", "shake", userId);
     }
     const unlocked = await checkAndUnlock(userId).catch(() => []);
-    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
+    for (const label of unlocked) showToast(label, 'success');
     setShowShakeModal(false);
     setSelectedPlantIds([]);
     await refresh();
   };
 
   const pendingPlants = plants.filter((p) => getPendingCareTypes(p).includes("riego"));
-  const pendingIds = pendingPlants.map((p) => p.localId);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -379,7 +359,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scroll}
       >
         <Animated.View entering={FadeInDown.delay(0).duration(400)}>
-          <GreetingCard user={user} />
+          <GreetingCard user={user} streak={streak} />
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(80).duration(400)}>
@@ -394,13 +374,12 @@ export default function HomeScreen() {
           <Animated.View entering={FadeInDown.delay(240).duration(400)}>
             <CareSection
               pendingPlants={pendingPlants}
-              onMarkDone={handleMarkDone}
             />
           </Animated.View>
         )}
 
         <Animated.View entering={FadeInDown.delay(320).duration(400)}>
-          <PlantGrid plants={plants} pendingIds={pendingIds} />
+          <PlantGrid plants={plants} />
         </Animated.View>
       </ScrollView>
 
