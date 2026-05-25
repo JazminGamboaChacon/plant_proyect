@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../src/context/ThemeContext";
+import { useAuth } from "../src/context/AuthContext";
 import { loadPlants } from "../src/services/plantStorageService";
 import { LocalPlant } from "../src/types-dtos/plant.types";
 import PlantCareCards from "../src/componets/common/PlantCareCards";
@@ -41,16 +42,17 @@ export default function PlantDetailScreen() {
   const { theme } = useTheme();
   const t = theme.colors;
 
+  const { user } = useAuth();
   const [plant, setPlant] = useState<LocalPlant | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const plants = await loadPlants();
+      const plants = await loadPlants(user?.id ?? 'user-1');
       setPlant(plants.find((p) => p.localId === localId) ?? null);
       setLoading(false);
     })();
-  }, [localId]);
+  }, [localId, user?.id]);
 
   if (loading) {
     return (
