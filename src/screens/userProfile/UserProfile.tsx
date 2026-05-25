@@ -186,7 +186,7 @@ export default function UserProfile() {
                 <Text style={styles.bioText}>{user.bio}</Text>
               </View>
             ) : null}
-            <View style={{ paddingHorizontal: theme.spacing.lg, alignSelf: "stretch" }}>
+            <View style={{ paddingHorizontal: theme.spacing.lg, alignSelf: "stretch", marginTop: theme.spacing.md }}>
               <ProfileInfoCard
                 icon="cake-variant"
                 label="Cumpleaños"
