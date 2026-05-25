@@ -23,9 +23,9 @@ const PLANT_TYPE_IMAGES: Record<string, string> = {
   tropical:
     "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=200&h=200&fit=crop",
   flowering:
-    "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop",
+    "https://images.unsplash.com/photo-1471086569966-db3eebc25a59?w=200&h=200&fit=crop",
   flower:
-    "https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=200&h=200&fit=crop",
+    "https://images.unsplash.com/photo-1471086569966-db3eebc25a59?w=200&h=200&fit=crop",
   herbs:
     "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop",
   cacti:
@@ -80,6 +80,7 @@ function mapApiToProfileData(api: ApiUserProfileResponse): UserProfileData {
     imageUrl: PLANT_TYPE_IMAGES[pt.id] || "",
     name: PLANT_TYPE_LABELS[pt.id] || pt.label,
     count: plantCountByType[pt.id] || 0,
+    icon: pt.icon,
   }));
 
   // Map achievements
