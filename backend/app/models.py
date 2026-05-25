@@ -144,6 +144,10 @@ class PlantCreateModel(BaseModel):
     notes: str = ""
 
 
+class UnlockAchievementRequest(BaseModel):
+    achievementKey: str
+
+
 class PlantCareModel(BaseModel):
     waterFreqDays: int = 3
     lastWatered: str | None = None
