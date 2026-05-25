@@ -13,6 +13,7 @@ import {
 import { Swipeable } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../src/context/ThemeContext";
+import { useAuth } from "../../src/context/AuthContext";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import { LocalPlant } from "../../src/types-dtos/plant.types";
 
@@ -108,7 +109,8 @@ function SwipeablePlantCard({
 export default function ExploreScreen() {
   const { theme } = useTheme();
   const t = theme.colors;
-  const { plants, isLoading, refresh, removePlant } = usePlantStorage("user-1");
+  const { user } = useAuth();
+  const { plants, isLoading, refresh, removePlant } = usePlantStorage(user?.id ?? "user-1");
   const [query, setQuery] = useState("");
 
   useFocusEffect(
