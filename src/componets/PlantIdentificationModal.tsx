@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { PlantIdentificationResult } from '../services/plantIdService';
-import { summarizeSunlight, summarizeSoil, summarizeWatering } from '../utils/plantTranslations';
+import PlantCareCards from './common/PlantCareCards';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PHOTO_HEIGHT = SCREEN_HEIGHT * 0.4;
@@ -184,18 +184,6 @@ function ScanOverlay({ photoHeight }: { photoHeight: number }) {
           />
         </View>
 
-        {/* Chips de pasos */}
-        <View style={styles.stepsRow}>
-          <View style={[styles.stepChip, { opacity: 0.4 }]}>
-            <Text style={styles.stepText}>✓ Captura</Text>
-          </View>
-          <View style={[styles.stepChip, styles.stepActive]}>
-            <Text style={[styles.stepText, { color: '#2D7A4F' }]}>🔍 Análisis</Text>
-          </View>
-          <View style={[styles.stepChip, { backgroundColor: '#EAEAEA' }]}>
-            <Text style={[styles.stepText, { color: '#AAA' }]}>📋 Resultado</Text>
-          </View>
-        </View>
       </View>
     </>
   );
@@ -239,56 +227,6 @@ function ToxicityBadge({ value }: { value: string }) {
   );
 }
 
-// ─── Care Card ─────────────────────────────────────────────────────────────
-
-function CareCard({
-  icon,
-  label,
-  summary,
-  fullText,
-  iconColor,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  summary: string;
-  fullText: string;
-  iconColor: string;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity style={styles.careCard} onPress={onPress} activeOpacity={0.75}>
-      <Feather name={icon as any} size={18} color={iconColor} />
-      <Text style={styles.careLabel}>{label}</Text>
-      <Text style={styles.careValue}>{summary}</Text>
-    </TouchableOpacity>
-  );
-}
-
-// ─── Care Detail Modal ─────────────────────────────────────────────────────
-
-function CareDetailModal({
-  detail,
-  onClose,
-}: {
-  detail: { label: string; fullText: string } | null;
-  onClose: () => void;
-}) {
-  return (
-    <Modal visible={!!detail} transparent animationType="fade">
-      <View style={styles.detailOverlay}>
-        <View style={styles.detailSheet}>
-          <Text style={styles.detailLabel}>{detail?.label}</Text>
-          <Text style={styles.detailText}>{detail?.fullText}</Text>
-          <TouchableOpacity style={styles.detailCloseBtn} onPress={onClose}>
-            <Text style={styles.detailCloseTxt}>Cerrar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Main Modal ────────────────────────────────────────────────────────────
 
 interface PlantIdentificationModalProps {
@@ -313,7 +251,6 @@ export default function PlantIdentificationModal({
   onRetake,
 }: PlantIdentificationModalProps) {
   const { theme } = useTheme();
-  const [careDetail, setCareDetail] = useState<{ label: string; fullText: string } | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
 
   const photoSource = photoBase64
@@ -363,8 +300,6 @@ export default function PlantIdentificationModal({
         {/* Estado: resultado */}
         {!isLoading && !error && result && result.isPlant && (
           <>
-            <CareDetailModal detail={careDetail} onClose={() => setCareDetail(null)} />
-
             <ScrollView
               style={{ flex: 1 }}
               contentContainerStyle={styles.resultContent}
@@ -396,32 +331,11 @@ export default function PlantIdentificationModal({
               )}
 
               {/* Tarjetas de cuidado */}
-              <View style={styles.careRow}>
-                <CareCard
-                  icon="droplet"
-                  label="Riego"
-                  summary={summarizeWatering(result.watering)}
-                  fullText={result.watering}
-                  iconColor="#3B9BDB"
-                  onPress={() => setCareDetail({ label: 'Riego', fullText: result.watering })}
-                />
-                <CareCard
-                  icon="sun"
-                  label="Luz"
-                  summary={summarizeSunlight(result.sunlight)}
-                  fullText={result.sunlight}
-                  iconColor="#E0A020"
-                  onPress={() => setCareDetail({ label: 'Luz', fullText: result.sunlight })}
-                />
-                <CareCard
-                  icon="layers"
-                  label="Sustrato"
-                  summary={summarizeSoil(result.soil)}
-                  fullText={result.soil}
-                  iconColor="#7A5C3A"
-                  onPress={() => setCareDetail({ label: 'Sustrato', fullText: result.soil })}
-                />
-              </View>
+              <PlantCareCards
+                watering={result.watering}
+                sunlight={result.sunlight}
+                soil={result.soil}
+              />
 
               {/* Descripción */}
               {result.description !== 'No disponible' && (
@@ -608,78 +522,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#C08010',
     fontWeight: '600',
-  },
-
-  // Care cards
-  careRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  careCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E0ECE0',
-    borderRadius: 14,
-    padding: 12,
-    alignItems: 'center',
-    gap: 4,
-    shadowColor: '#2D7A4F',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  careLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    color: '#4A8A6A',
-    letterSpacing: 0.5,
-  },
-  careValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1A2A1A',
-    textAlign: 'center',
-  },
-
-  // Care detail modal
-  detailOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
-  detailSheet: {
-    backgroundColor: '#FAF7F2',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 24,
-    gap: 12,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#2D7A4F',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#4A5A4E',
-    lineHeight: 22,
-  },
-  detailCloseBtn: {
-    backgroundColor: '#E8F5EE',
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  detailCloseTxt: {
-    color: '#2D7A4F',
-    fontWeight: '600',
-    fontSize: 14,
   },
 
   // Description
