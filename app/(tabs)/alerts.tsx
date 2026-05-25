@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  SafeAreaView,
   StyleSheet,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -25,6 +25,7 @@ import {
 import { requestNotificationPermissions } from '../../src/services/notificationService';
 import { checkAndUnlock } from '../../src/services/achievementService';
 import Header from '../../src/componets/common/Header';
+import MonsteraLoader from '../../src/componets/common/MonsteraLoader';
 import { CareHistoryEntry, CareType, LocalPlant } from '../../src/types-dtos/plant.types';
 
 const MONTH_NAMES = [
@@ -47,14 +48,6 @@ const CARE_DOT_COLOR: Record<CareType, string> = {
 
 type DayCareEntry = { plant: LocalPlant; careType: CareType };
 
-function isFavorable(careType: CareType, phaseName: string): boolean {
-  const rules: Record<CareType, string[]> = {
-    riego: ['Llena', 'Creciente'],
-    abono: ['Menguante'],
-    poda:  ['Menguante'],
-  };
-  return rules[careType].some((w) => phaseName.includes(w));
-}
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -100,7 +93,7 @@ export default function AlertsScreen() {
     await recordCare(plant, careType, 'manual', user.id);
     await refresh();
     const unlocked = await checkAndUnlock(user.id).catch(() => []);
-    for (const label of unlocked) showToast(`🏆 ${label}`, 'success');
+    for (const label of unlocked) showToast(label, 'success');
     await loadHistory();
     setMarkingPlant(null);
   };
@@ -151,6 +144,14 @@ export default function AlertsScreen() {
   for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
 
   const s = styles(theme);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[s.safe, { backgroundColor: '#08200F' }]}>
+        <MonsteraLoader />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={s.safe}>
@@ -276,7 +277,6 @@ export default function AlertsScreen() {
                 <View style={s.plantInfo}>
                   <Text style={s.plantName} numberOfLines={1}>{plant.commonName}</Text>
                   {types.map((ct) => {
-                    const favorable = isFavorable(ct, phase.name);
                     const isMarking = markingPlant === plant.localId + ct;
                     return (
                       <View key={ct} style={s.careRow}>
@@ -286,11 +286,6 @@ export default function AlertsScreen() {
                               {CARE_LABEL[ct]}
                             </Text>
                           </View>
-                          {favorable && (
-                            <View style={[s.pill, { backgroundColor: '#FFF3E0' }]}>
-                              <Text style={[s.pillText, { color: '#E65100' }]}>Favorable</Text>
-                            </View>
-                          )}
                         </View>
                         <TouchableOpacity
                           style={[s.doneBtn, isMarking && { opacity: 0.5 }]}
@@ -311,11 +306,27 @@ export default function AlertsScreen() {
           })
         )}
 
-        {/* D — Care history */}
+        {/* D — Guía lunar */}
+        <View style={s.lunarGuideCard}>
+          <Text style={s.lunarGuideTitle}>Guía lunar para el cuidado</Text>
+          {[
+            { label: 'Riego',       desc: 'Luna Llena o Creciente' },
+            { label: 'Fertilizar',  desc: 'Luna Creciente'         },
+            { label: 'Poda',        desc: 'Luna Menguante'         },
+          ].map((row) => (
+            <View key={row.label} style={s.lunarGuideRow}>
+              <Feather name="moon" size={14} color="#7B68EE" />
+              <Text style={s.lunarGuideLabel}>{row.label}</Text>
+              <Text style={s.lunarGuideDesc}>{row.desc}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* E — Care history */}
         <Text style={s.sectionTitle}>Historial reciente</Text>
         {history.length === 0 ? (
           <View style={s.emptyCard}>
-            <Text style={s.emptyText}>Sin registros aun</Text>
+            <Text style={s.emptyText}>Sin registros aún</Text>
           </View>
         ) : (
           history.slice(0, 5).map((entry) => (
@@ -513,8 +524,8 @@ function styles(theme: ReturnType<typeof import('../../src/context/ThemeContext'
     plantCard: {
       backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.md,
-      padding: 12,
-      marginBottom: 10,
+      padding: 16,
+      marginBottom: 14,
       flexDirection: 'row',
       gap: 12,
       borderWidth: 1,
@@ -531,19 +542,50 @@ function styles(theme: ReturnType<typeof import('../../src/context/ThemeContext'
       fontFamily: theme.typography.families.bold,
       fontSize: theme.typography.sizes.sm,
       color: theme.colors.textPrimary,
-      marginBottom: 6,
+      marginBottom: 10,
     },
     careRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 4,
+      marginBottom: 10,
     },
     pillRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', flex: 1 },
     pill: {
-      paddingHorizontal: 8,
-      paddingVertical: 2,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
       borderRadius: theme.radius.full,
+    },
+    lunarGuideCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.radius.md,
+      padding: 16,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      gap: 10,
+    },
+    lunarGuideTitle: {
+      fontFamily: theme.typography.families.bold,
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textPrimary,
+      marginBottom: 4,
+    },
+    lunarGuideRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    lunarGuideLabel: {
+      fontFamily: theme.typography.families.medium,
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textPrimary,
+      width: 80,
+    },
+    lunarGuideDesc: {
+      fontSize: theme.typography.sizes.sm,
+      color: theme.colors.textSecondary,
+      flex: 1,
     },
     pillText: {
       fontFamily: theme.typography.families.medium,
@@ -552,7 +594,7 @@ function styles(theme: ReturnType<typeof import('../../src/context/ThemeContext'
     doneBtn: {
       backgroundColor: theme.colors.primary,
       paddingHorizontal: 12,
-      paddingVertical: 4,
+      paddingVertical: 7,
       borderRadius: theme.radius.full,
       minWidth: 58,
       alignItems: 'center',
