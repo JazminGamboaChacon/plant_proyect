@@ -72,7 +72,7 @@ export async function recordCare(
     ...(careType === 'poda'   ? { lastPruned:     now.toISOString() } : {}),
   };
 
-  await updatePlantCare(plant.localId, care);
+  await updatePlantCare(userId, plant.localId, care);
   const updatedPlant: LocalPlant = { ...plant, care };
   return updatedPlant;
 }
