@@ -30,9 +30,9 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
   const [lastSyncError, setLastSyncError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const data = await loadPlants();
+    const data = await loadPlants(userId);
     setPlants(data);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     (async () => {
@@ -48,7 +48,7 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
       tempPhotoUri: string
     ): Promise<LocalPlant> => {
       const localPhotoUri = await persistPhoto(tempPhotoUri);
-      const plant = await addPlant({ ...draft, localPhotoUri });
+      const plant = await addPlant(userId, { ...draft, localPhotoUri });
       await refresh();
       return plant;
     },
@@ -56,7 +56,7 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
   );
 
   const removePlant = useCallback(async (localId: string) => {
-    await deletePlant(localId);
+    await deletePlant(userId, localId);
     await refresh();
   }, [refresh]);
 
