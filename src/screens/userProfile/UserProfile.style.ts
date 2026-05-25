@@ -11,7 +11,8 @@ export const createStyles = (theme: AppTheme) =>
     profileSection: {
       alignItems: "center",
       paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.md,
+      paddingTop: theme.spacing.md,
+      paddingBottom: theme.spacing.xl,
     },
     avatarWrapper: {
       width: 120,
