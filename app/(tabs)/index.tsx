@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -24,7 +24,7 @@ import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import { type ApiUser } from "../../src/services/api";
 import { Accelerometer } from "expo-sensors";
 import * as Haptics from "expo-haptics";
-import { getLunarPhase, getDailyTip, type LunarDay } from "../../src/utils/lunarPhase";
+import { getDailyTip } from "../../src/utils/lunarPhase";
 import { LocalPlant } from "../../src/types-dtos/plant.types";
 import { recordCare, getPendingCareTypes } from "../../src/services/careService";
 import { checkAndUnlock } from "../../src/services/achievementService";
@@ -58,23 +58,15 @@ function DecorLeaf() {
   );
 }
 
-// ── Estrellas para la card lunar ──────────────────────────────────────────────
-const STARS = [
-  { top: "18%", right: "22%", size: 2, opacity: 0.6 },
-  { top: "35%", right: "40%", size: 1.5, opacity: 0.35 },
-  { top: "65%", right: "15%", size: 2, opacity: 0.7 },
-  { top: "22%", right: "60%", size: 1, opacity: 0.3 },
-  { top: "75%", right: "50%", size: 1.5, opacity: 0.5 },
-  { top: "48%", right: "8%", size: 1, opacity: 0.4 },
-];
-
 // ── Sección 1: Saludo ─────────────────────────────────────────────────────────
 function GreetingCard({ user, streak }: { user: ApiUser | null; streak: number }) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   const initial = (user?.fullName ?? user?.username ?? "U")[0].toUpperCase();
   const today = new Date();
 
   return (
-    <View style={styles.greetingCard}>
+    <View style={[styles.greetingCard, { backgroundColor: t.surface, borderColor: t.border }]}>
       <DecorLeaf />
       <View style={styles.greetingTop}>
         {/* Avatar */}
@@ -90,10 +82,10 @@ function GreetingCard({ user, streak }: { user: ApiUser | null; streak: number }
         )}
         {/* Nombre + fecha */}
         <View style={{ flex: 1 }}>
-          <Text style={styles.greetingName} numberOfLines={1}>
+          <Text style={[styles.greetingName, { color: t.textPrimary }]} numberOfLines={1}>
             Hola, @{user?.username ?? "usuario"}
           </Text>
-          <Text style={styles.greetingDate}>{formatDate(today)}</Text>
+          <Text style={[styles.greetingDate, { color: t.textSecondary }]}>{formatDate(today)}</Text>
         </View>
         {/* Streak pill */}
         <View style={styles.streakPill}>
@@ -103,17 +95,17 @@ function GreetingCard({ user, streak }: { user: ApiUser | null; streak: number }
       </View>
       {/* Tip motivacional */}
       {streak === 0 && (
-        <View style={styles.motivTip}>
-          <Feather name="info" size={13} color="#2D7A4F" />
-          <Text style={styles.motivText}>
+        <View style={[styles.motivTip, { backgroundColor: t.primarySoft }]}>
+          <Feather name="info" size={13} color={t.primary} />
+          <Text style={[styles.motivText, { color: t.primary }]}>
             Abre la app cada día para mantener tu racha
           </Text>
         </View>
       )}
       {streak === 1 && (
-        <View style={styles.motivTip}>
+        <View style={[styles.motivTip, { backgroundColor: t.primarySoft }]}>
           <Feather name="zap" size={13} color="#E65100" />
-          <Text style={styles.motivText}>
+          <Text style={[styles.motivText, { color: t.primary }]}>
             Llevas 1 día seguido, vuelve mañana para sumar
           </Text>
         </View>
@@ -122,79 +114,48 @@ function GreetingCard({ user, streak }: { user: ApiUser | null; streak: number }
   );
 }
 
-// ── Sección 2: Luna ───────────────────────────────────────────────────────────
-function LunarCard({ lunar }: { lunar: LunarDay }) {
-  return (
-    <View style={styles.lunarCard}>
-      {STARS.map((s, i) => (
-        <View
-          key={i}
-          style={{
-            position: "absolute",
-            top: s.top as any,
-            right: s.right as any,
-            width: s.size,
-            height: s.size,
-            borderRadius: s.size / 2,
-            backgroundColor: "#fff",
-            opacity: s.opacity,
-          }}
-        />
-      ))}
-      <View style={styles.lunarBadge}>
-        <Text style={styles.lunarBadgeText}>Hoy</Text>
-      </View>
-      <Feather name="moon" size={32} color="#C0B0EE" />
-      <View style={{ flex: 1 }}>
-        <Text style={styles.lunarName}>{lunar.name}</Text>
-        <Text style={styles.lunarRec}>{lunar.recommendation}</Text>
-      </View>
-    </View>
-  );
-}
-
 // ── Sección 3: Tip del día ────────────────────────────────────────────────────
 function DailyTipCard({ tip }: { tip: string }) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   return (
     <LinearGradient
-      colors={["#E8F5EE", "#D4F0E0"]}
+      colors={[t.primarySoft, t.primaryPale]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.tipCard}
+      style={[styles.tipCard, { borderColor: t.primaryLight }]}
     >
-      <Feather name="feather" size={20} color="#2D7A4F" style={{ marginTop: 1 }} />
+      <Feather name="feather" size={20} color={t.primary} style={{ marginTop: 1 }} />
       <View style={{ flex: 1 }}>
-        <Text style={styles.tipLabel}>TIP DEL DÍA</Text>
-        <Text style={styles.tipText}>{tip}</Text>
+        <Text style={[styles.tipLabel, { color: t.primary }]}>TIP DEL DÍA</Text>
+        <Text style={[styles.tipText, { color: t.textPrimary }]}>{tip}</Text>
       </View>
     </LinearGradient>
   );
 }
 
 // ── Sección 4: Cuidados ───────────────────────────────────────────────────────
-function CareSection({
-  pendingPlants,
-}: {
-  pendingPlants: LocalPlant[];
-}) {
+function CareSection({ pendingPlants }: { pendingPlants: LocalPlant[] }) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Cuidados pendientes</Text>
+        <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Cuidados pendientes</Text>
       </View>
 
       {pendingPlants.length === 0 ? (
-        <View style={styles.allDoneBox}>
-          <View style={styles.allDoneIcon}>
-            <Feather name="check" size={22} color="#2D7A4F" />
+        <View style={[styles.allDoneBox, { backgroundColor: t.surface, borderColor: t.border }]}>
+          <View style={[styles.allDoneIcon, { backgroundColor: t.primarySoft }]}>
+            <Feather name="check" size={22} color={t.primary} />
           </View>
-          <Text style={styles.allDoneText}>
+          <Text style={[styles.allDoneText, { color: t.textSecondary }]}>
             ¡Todo al día! Sin cuidados pendientes.
           </Text>
         </View>
       ) : (
         pendingPlants.map((plant) => (
-          <View key={plant.localId} style={styles.careRow}>
+          <View key={plant.localId} style={[styles.careRow, { backgroundColor: t.surface, borderColor: t.border }]}>
             {plant.localPhotoUri ? (
               <Image
                 source={{ uri: plant.localPhotoUri }}
@@ -202,12 +163,12 @@ function CareSection({
                 resizeMode="cover"
               />
             ) : (
-              <View style={[styles.carePhoto, styles.carePlaceholder]}>
-                <Feather name="image" size={16} color="#8A9A8A" />
+              <View style={[styles.carePhoto, styles.carePlaceholder, { backgroundColor: t.primarySoft }]}>
+                <Feather name="image" size={16} color={t.textSecondary} />
               </View>
             )}
             <View style={{ flex: 1 }}>
-              <Text style={styles.careName} numberOfLines={1}>
+              <Text style={[styles.careName, { color: t.textPrimary }]} numberOfLines={1}>
                 {plant.commonName}
               </Text>
               <View style={styles.careTypePill}>
@@ -223,76 +184,95 @@ function CareSection({
 }
 
 // ── Sección 5: Grid de plantas ────────────────────────────────────────────────
-function PlantGrid({
-  plants,
-}: {
-  plants: LocalPlant[];
-}) {
+function PlantGrid({ plants }: { plants: LocalPlant[] }) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   const { width } = useWindowDimensions();
-  const cardW = (width - 16 * 2 - 8) / 2;
-
-  const rows: LocalPlant[][] = [];
-  for (let i = 0; i < Math.max(plants.length, 1); i += 2) {
-    rows.push(plants.slice(i, i + 2));
-  }
+  const cardW = Math.round(width * 0.42);
 
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Mis plantas</Text>
+        <Text style={[styles.sectionTitle, { color: t.textPrimary }]}>Mis plantas</Text>
         <TouchableOpacity onPress={() => router.push("/(tabs)/explore" as any)}>
-          <Text style={styles.sectionLink}>Ver colección →</Text>
+          <Text style={[styles.sectionLink, { color: t.primary }]}>Ver colección →</Text>
         </TouchableOpacity>
       </View>
 
       {plants.length === 0 ? (
-        <View style={styles.gridRow}>
+        <View style={{ paddingHorizontal: 16 }}>
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/add" as any)}
-            style={[styles.emptyPlantCard, { width: cardW }]}
+            style={[styles.emptyPlantCard, { backgroundColor: t.primarySoft, borderColor: t.primaryLight, width: cardW }]}
           >
-            <Feather name="plus" size={24} color="#2D7A4F" />
-            <Text style={styles.emptyPlantText}>
-              Agrega tu primera planta
-            </Text>
+            <Feather name="plus" size={24} color={t.primary} />
+            <Text style={[styles.emptyPlantText, { color: t.primary }]}>Agrega tu primera planta</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        rows.map((row, ri) => (
-          <View key={ri} style={styles.gridRow}>
-            {row.map((plant) => {
-              return (
-                <TouchableOpacity
-                  key={plant.localId}
-                  onPress={() =>
-                    router.push(`/plant-detail?localId=${plant.localId}` as any)
-                  }
-                  style={[styles.plantCard, { width: cardW }]}
-                  activeOpacity={0.8}
-                >
-                  {plant.localPhotoUri ? (
-                    <Image
-                      source={{ uri: plant.localPhotoUri }}
-                      style={styles.plantPhoto}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={[styles.plantPhoto, styles.plantPhotoPlaceholder]}>
-                      <Feather name="feather" size={24} color="#2D7A4F" />
-                    </View>
-                  )}
-                  <View style={{ padding: 10 }}>
-                    <Text style={styles.plantName} numberOfLines={1}>
-                      {plant.commonName}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        ))
+        <FlatList
+          data={plants}
+          keyExtractor={(p) => p.localId}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.plantRow}
+          renderItem={({ item: plant }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/plant-detail?localId=${plant.localId}` as any)}
+              style={[styles.plantCard, { backgroundColor: t.surface, borderColor: t.border, width: cardW }]}
+              activeOpacity={0.8}
+            >
+              {plant.localPhotoUri ? (
+                <Image
+                  source={{ uri: plant.localPhotoUri }}
+                  style={styles.plantPhoto}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={[styles.plantPhoto, styles.plantPhotoPlaceholder, { backgroundColor: t.primarySoft }]}>
+                  <Feather name="feather" size={24} color={t.primary} />
+                </View>
+              )}
+              <View style={{ padding: 10 }}>
+                <Text style={[styles.plantName, { color: t.textPrimary }]} numberOfLines={1}>
+                  {plant.commonName}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       )}
     </View>
+  );
+}
+
+// ── Sección 6: Doctor de Plantas ─────────────────────────────────────────────
+function DoctorCard() {
+  const { theme, isDark } = useTheme();
+  const t = theme.colors;
+  const gradientColors = isDark
+    ? (["#2A1508", "#1A0D04"] as const)
+    : (["#FFF3E0", "#FFE8CC"] as const);
+  const iconBg = isDark ? "#2A1508" : "#FFF8E1";
+  const borderColor = isDark ? "#5C2A10" : "#FFB74D";
+  return (
+    <TouchableOpacity onPress={() => router.push("/doctor" as any)} activeOpacity={0.82}>
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.doctorCard, { borderColor }]}
+      >
+        <View style={[styles.doctorIconBox, { backgroundColor: iconBg }]}>
+          <MaterialCommunityIcons name="stethoscope" size={28} color="#E65100" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.doctorTitle, { color: t.textPrimary }]}>Doctor de Plantas</Text>
+          <Text style={[styles.doctorSubtitle, { color: t.textSecondary }]}>Diagnostica enfermedades y plagas</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color={t.textSecondary} />
+      </LinearGradient>
+    </TouchableOpacity>
   );
 }
 
@@ -309,7 +289,6 @@ export default function HomeScreen() {
   const [selectedPlantIds, setSelectedPlantIds] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const cooldownRef = useRef(false);
-  const lunar = getLunarPhase();
   const dailyTip = getDailyTip();
 
   useFocusEffect(
@@ -363,10 +342,6 @@ export default function HomeScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(80).duration(400)}>
-          <LunarCard lunar={lunar} />
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(160).duration(400)}>
           <DailyTipCard tip={dailyTip} />
         </Animated.View>
 
@@ -380,6 +355,10 @@ export default function HomeScreen() {
 
         <Animated.View entering={FadeInDown.delay(320).duration(400)}>
           <PlantGrid plants={plants} />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+          <DoctorCard />
         </Animated.View>
       </ScrollView>
 
@@ -506,32 +485,6 @@ const styles = StyleSheet.create({
   },
   motivText: { color: "#2D7A4F", fontSize: 12, lineHeight: 17, flex: 1 },
 
-  // Lunar
-  lunarCard: {
-    backgroundColor: "#1A1040",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#3D2D80",
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    overflow: "hidden",
-    minHeight: 80,
-  },
-  lunarBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  lunarBadgeText: { color: "#C0B0EE", fontSize: 11, fontWeight: "600" },
-  lunarName: { color: "#E0D4FF", fontSize: 16, fontWeight: "700" },
-  lunarRec: { color: "#A090CC", fontSize: 13, marginTop: 3, lineHeight: 18 },
-
   // Tip del día
   tipCard: {
     borderRadius: 16,
@@ -625,7 +578,7 @@ const styles = StyleSheet.create({
   },
 
   // Plant grid
-  gridRow: { flexDirection: "row", gap: 8 },
+  plantRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 4 },
   plantCard: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -638,7 +591,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 1 },
   },
-  plantPhoto: { width: "100%", height: 80 },
+  plantPhoto: { width: "100%", height: 100 },
   plantPhotoPlaceholder: {
     backgroundColor: "#E8F5EE",
     justifyContent: "center",
@@ -665,6 +618,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     fontWeight: "500",
+  },
+
+  // Doctor card
+  doctorCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#FFB74D",
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    elevation: 2,
+    shadowColor: "#E65100",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  doctorIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#FFF8E1",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  doctorTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1A2A1A",
+  },
+  doctorSubtitle: {
+    fontSize: 12,
+    color: "#8A9A8A",
+    marginTop: 3,
   },
 
   // Shake modal

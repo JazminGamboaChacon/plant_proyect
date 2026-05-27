@@ -28,16 +28,9 @@ export default function Header() {
             color={theme.colors.textSecondary}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => router.push("/settings" as any)}>
           <Feather
             name="settings"
-            size={theme.iconSize.lg}
-            color={theme.colors.textSecondary}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn}>
-          <Feather
-            name="more-horizontal"
             size={theme.iconSize.lg}
             color={theme.colors.textSecondary}
           />

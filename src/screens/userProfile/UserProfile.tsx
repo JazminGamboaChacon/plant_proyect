@@ -1,4 +1,4 @@
-import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useCallback, useEffect } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
@@ -139,36 +139,6 @@ export default function UserProfile() {
           showsVerticalScrollIndicator={false}
         >
           <Header />
-
-          {/* Botón editar perfil */}
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              alignSelf: "flex-end",
-              marginRight: theme.spacing.lg,
-              marginBottom: theme.spacing.sm,
-              paddingHorizontal: theme.spacing.md,
-              paddingVertical: theme.spacing.xs,
-              backgroundColor: theme.colors.surface,
-              borderWidth: 1,
-              borderColor: theme.colors.border,
-              borderRadius: theme.radius.md,
-              gap: theme.spacing.xs,
-            }}
-            onPress={() => router.push("/edit-profile" as any)}
-          >
-            <Feather name="edit-2" size={14} color={theme.colors.primary} />
-            <Text
-              style={{
-                fontFamily: theme.typography.families.medium,
-                fontSize: theme.typography.sizes.sm,
-                color: theme.colors.primary,
-              }}
-            >
-              Editar Perfil
-            </Text>
-          </TouchableOpacity>
 
           {/* Perfil */}
           <View style={styles.profileSection}>
