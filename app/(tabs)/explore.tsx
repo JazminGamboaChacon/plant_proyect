@@ -112,6 +112,9 @@ function DiagnosisDetailModal({
   return (
     <Modal visible={!!diagnosis} animationType="slide" transparent={false}>
       <SafeAreaView style={[detailStyles.safe, { backgroundColor: t.surface }]}>
+        <TouchableOpacity onPress={onClose} style={detailStyles.backBtn}>
+          <Feather name="arrow-left" size={20} color="#fff" />
+        </TouchableOpacity>
         <ScrollView contentContainerStyle={detailStyles.scroll} showsVerticalScrollIndicator={false}>
           {diagnosis.photoUri ? (
             <Image source={{ uri: diagnosis.photoUri }} style={detailStyles.photo} resizeMode="cover" />
@@ -178,11 +181,6 @@ function DiagnosisDetailModal({
           )}
         </ScrollView>
 
-        <View style={[detailStyles.actions, { borderTopColor: t.border }]}>
-          <TouchableOpacity onPress={onClose} style={[detailStyles.closeBtn, { backgroundColor: t.primary }]}>
-            <Text style={detailStyles.closeBtnText}>Cerrar</Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     </Modal>
   );
@@ -470,9 +468,18 @@ const detailStyles = StyleSheet.create({
   productBlock: { flexDirection: "row", gap: 10, backgroundColor: "#F5F3FF", borderWidth: 1, borderColor: "#DDD6FE" },
   infoLabel: { fontSize: 11, fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: 0.5 },
   infoText: { fontSize: 14, color: "#374151", lineHeight: 20 },
-  actions: { padding: 16, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
-  closeBtn: { paddingVertical: 13, borderRadius: 12, backgroundColor: "#1B4332", alignItems: "center" },
-  closeBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  backBtn: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 const styles = StyleSheet.create({
