@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
+import { useTheme } from "../../context/ThemeContext";
 
 type Props = {
   icon: string;
@@ -10,12 +11,14 @@ type Props = {
 };
 
 export default function ProfileInfoCard({ icon, label, value, accentColor }: Props) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   return (
     <View
       style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: t.surface,
         borderRadius: 16,
         paddingVertical: 18,
         paddingHorizontal: 20,
@@ -46,7 +49,7 @@ export default function ProfileInfoCard({ icon, label, value, accentColor }: Pro
         <Text style={{ fontSize: 12, fontWeight: "500", color: accentColor }}>
           {label}
         </Text>
-        <Text style={{ fontSize: 16, fontWeight: "500", color: "#2C2C2A" }}>
+        <Text style={{ fontSize: 16, fontWeight: "500", color: t.textPrimary }}>
           {value}
         </Text>
       </View>
