@@ -63,7 +63,7 @@ export default function TabLayout() {
               style={{ flex: 1, alignItems: "center", justifyContent: "center", top: -18 }}
             >
               <View style={styles.addBtn}>
-                <Ionicons name="add" size={30} color="#fff" />
+                <Ionicons name="camera-outline" size={26} color="#fff" />
                 {pendingCount > 0 && (
                   <View style={[styles.badge, { backgroundColor: theme.colors.error }]}>
                     <Text style={styles.badgeText}>
