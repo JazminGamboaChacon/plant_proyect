@@ -19,6 +19,7 @@ class UserModel(FirestoreBaseModel):
     username: str
     fullName: str
     birthday: str = ""
+    bio: str = ""
     photoURL: str | None = None
     isPublicProfile: bool = False
     favoritePlantTypes: list[str] = []
@@ -42,6 +43,7 @@ class RegisterRequest(BaseModel):
     birthday: str
     favoritePlantTypes: list[str]
     photoBase64: Optional[str] = None
+    bio: str = ""
 
 
 class AuthResponse(BaseModel):
@@ -109,6 +111,7 @@ class UserUpdateModel(BaseModel):
     username: str | None = None
     fullName: str | None = None
     birthday: str | None = None
+    bio: str | None = None
     photoURL: str | None = None
     isPublicProfile: bool | None = None
     favoritePlantTypes: list[str] | None = None
@@ -139,5 +142,20 @@ class PlantCreateModel(BaseModel):
     groupId: str = ""
     isFavorite: bool = False
     notes: str = ""
+
+
+class UnlockAchievementRequest(BaseModel):
+    achievementKey: str
+
+
+class PlantCareModel(BaseModel):
+    waterFreqDays: int = 3
+    lastWatered: str | None = None
+    fertilizeFreqDays: int = 30
+    lastFertilized: str | None = None
+    pruneFreqDays: int = 60
+    lastPruned: str | None = None
+    lightType: str = "mixto"
+    careNotes: str = ""
 
 

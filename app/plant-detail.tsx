@@ -13,34 +13,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../src/context/ThemeContext";
+import { useAuth } from "../src/context/AuthContext";
 import { loadPlants } from "../src/services/plantStorageService";
 import { LocalPlant } from "../src/types-dtos/plant.types";
+import PlantCareCards from "../src/componets/common/PlantCareCards";
 
 const PHOTO_HEIGHT = Dimensions.get("window").height * 0.38;
-
-function InfoRow({
-  icon,
-  label,
-  value,
-  textColor,
-  secondaryColor,
-  borderColor,
-}: {
-  icon: string;
-  label: string;
-  value: string;
-  textColor: string;
-  secondaryColor: string;
-  borderColor: string;
-}) {
-  return (
-    <View style={[styles.infoCard, { borderColor }]}>
-      <Feather name={icon as any} size={18} color={secondaryColor} />
-      <Text style={[styles.infoLabel, { color: secondaryColor }]}>{label}</Text>
-      <Text style={[styles.infoValue, { color: textColor }]}>{value}</Text>
-    </View>
-  );
-}
 
 function ToxicityBadge({ value }: { value: string }) {
   if (!value || value === "No disponible") return null;
@@ -64,16 +42,17 @@ export default function PlantDetailScreen() {
   const { theme } = useTheme();
   const t = theme.colors;
 
+  const { user } = useAuth();
   const [plant, setPlant] = useState<LocalPlant | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const plants = await loadPlants();
+      const plants = await loadPlants(user?.id ?? 'user-1');
       setPlant(plants.find((p) => p.localId === localId) ?? null);
       setLoading(false);
     })();
-  }, [localId]);
+  }, [localId, user?.id]);
 
   if (loading) {
     return (
@@ -163,32 +142,11 @@ export default function PlantDetailScreen() {
         </View>
 
         {/* Cuidados */}
-        <View style={styles.careRow}>
-          <InfoRow
-            icon="droplet"
-            label="Riego"
-            value={plant.watering || "No disponible"}
-            textColor={t.textPrimary}
-            secondaryColor={t.textSecondary}
-            borderColor={t.border}
-          />
-          <InfoRow
-            icon="sun"
-            label="Luz"
-            value={plant.sunlight || "No disponible"}
-            textColor={t.textPrimary}
-            secondaryColor={t.textSecondary}
-            borderColor={t.border}
-          />
-          <InfoRow
-            icon="layers"
-            label="Sustrato"
-            value={plant.soil || "No disponible"}
-            textColor={t.textPrimary}
-            secondaryColor={t.textSecondary}
-            borderColor={t.border}
-          />
-        </View>
+        <PlantCareCards
+          watering={plant.watering || "No disponible"}
+          sunlight={plant.sunlight || "No disponible"}
+          soil={plant.soil || "No disponible"}
+        />
 
         {/* Descripción */}
         {plant.description && plant.description !== "No disponible" && (
@@ -287,28 +245,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 13,
     fontWeight: "600",
-  },
-  careRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 4,
-  },
-  infoCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    alignItems: "center",
-    gap: 4,
-  },
-  infoLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-  infoValue: {
-    fontSize: 12,
-    textAlign: "center",
   },
   descriptionBox: {
     borderRadius: 10,

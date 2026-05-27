@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { LocalPlant, LocalPlantDraft } from '../types-dtos/plant.types';
 import {
   addPlant,
+  deletePlant,
   loadPlants,
   persistPhoto,
 } from '../services/plantStorageService';
@@ -17,6 +18,7 @@ export interface UsePlantStorageReturn {
     draft: Omit<LocalPlantDraft, 'localPhotoUri'>,
     tempPhotoUri: string
   ) => Promise<LocalPlant>;
+  removePlant: (localId: string) => Promise<void>;
   syncNow: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -28,9 +30,9 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
   const [lastSyncError, setLastSyncError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const data = await loadPlants();
+    const data = await loadPlants(userId);
     setPlants(data);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     (async () => {
@@ -46,12 +48,17 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
       tempPhotoUri: string
     ): Promise<LocalPlant> => {
       const localPhotoUri = await persistPhoto(tempPhotoUri);
-      const plant = await addPlant({ ...draft, localPhotoUri });
+      const plant = await addPlant(userId, { ...draft, localPhotoUri });
       await refresh();
       return plant;
     },
     [refresh]
   );
+
+  const removePlant = useCallback(async (localId: string) => {
+    await deletePlant(userId, localId);
+    await refresh();
+  }, [refresh]);
 
   const syncNow = useCallback(async () => {
     if (isSyncing) return;
@@ -81,6 +88,7 @@ export function usePlantStorage(userId: string): UsePlantStorageReturn {
     isSyncing,
     lastSyncError,
     savePlant,
+    removePlant,
     syncNow,
     refresh,
   };

@@ -31,6 +31,7 @@ export type ApiUser = {
   username: string;
   fullName: string;
   birthday: string;
+  bio: string;
   photoURL: string | null;
   isPublicProfile: boolean;
   favoritePlantTypes: string[];
@@ -113,13 +114,14 @@ export function registerUser(data: {
   birthday: string;
   favoritePlantTypes: string[];
   photoBase64?: string;
+  bio?: string;
 }): Promise<AuthResponse> {
   return authPost("/api/auth/register", data);
 }
 
 async function apiMutate<T>(
   path: string,
-  method: "PUT" | "POST" | "DELETE",
+  method: "PUT" | "POST" | "DELETE" | "PATCH",
   body?: unknown,
 ): Promise<T> {
   if (!API_BASE) throw new Error("EXPO_PUBLIC_API_URL no definida en .env");
@@ -139,6 +141,7 @@ export type UserUpdatePayload = {
   username?: string;
   fullName?: string;
   birthday?: string;
+  bio?: string;
   photoURL?: string | null;
   isPublicProfile?: boolean;
   favoritePlantTypes?: string[];
@@ -199,5 +202,21 @@ export type PlantCreatePayload = {
 
 export function createPlant(data: PlantCreatePayload): Promise<ApiPlant> {
   return apiMutate("/api/plants", "POST", data);
+}
+
+export function patchPlantCare(
+  plantId: string,
+  care: import("../types-dtos/plant.types").PlantCare,
+): Promise<void> {
+  return apiMutate(`/api/plants/${plantId}/care`, "PATCH", {
+    waterFreqDays:     care.waterFreqDays,
+    lastWatered:       care.lastWatered,
+    fertilizeFreqDays: care.fertilizeFreqDays,
+    lastFertilized:    care.lastFertilized,
+    pruneFreqDays:     care.pruneFreqDays,
+    lastPruned:        care.lastPruned,
+    lightType:         care.lightType,
+    careNotes:         care.careNotes,
+  });
 }
 

@@ -1,8 +1,10 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { CameraView } from "expo-camera";
+import { router } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePlantStorage } from "../../src/hooks/usePlantStorage";
 import {
   ActivityIndicator,
@@ -13,18 +15,27 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CameraPermissionModal from "../../src/componets/common/CameraPermissionModal";
+import CameraPermissionScreen from "../../src/componets/common/CameraPermissionScreen";
 import PlantIdentificationModal from "../../src/componets/PlantIdentificationModal";
 import { useTheme } from "../../src/context/ThemeContext";
+import { useAuth } from "../../src/context/AuthContext";
+import { useToast } from "../../src/context/ToastContext";
 import { useCamera } from "../../src/hooks/useCamera";
 import { PhotoResult } from "../../src/services/cameraService";
 import {
   identifyPlant,
   PlantIdentificationResult,
 } from "../../src/services/plantIdService";
+import { checkAndUnlock } from "../../src/services/achievementService";
+
+const CAMERA_PERM_KEY = "@camera_perm_asked";
 
 export default function AddScreen() {
   const { theme } = useTheme();
-  const { savePlant } = usePlantStorage("user-1");
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const { savePlant } = usePlantStorage(user?.id ?? "user-1");
   const {
     cameraRef,
     permissions,
@@ -37,7 +48,36 @@ export default function AddScreen() {
     takePhoto,
     toggleFacing,
     toggleFlash,
-  } = useCamera({ requestOnMount: true });
+  } = useCamera({ requestOnMount: false });
+
+  const [isCheckingPermissions, setIsCheckingPermissions] = useState(true);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+
+  useEffect(() => {
+    // Consultar AsyncStorage sin tocar ninguna API de cámara,
+    // así Expo Go no dispara su propio diálogo nativo antes que el nuestro.
+    AsyncStorage.getItem(CAMERA_PERM_KEY).then((val) => {
+      if (!val) {
+        setShowPermissionModal(true);
+        setIsCheckingPermissions(false);
+      } else {
+        // Ya se mostró el modal antes: sincronizar estado del hook
+        requestPermissions().finally(() => setIsCheckingPermissions(false));
+      }
+    });
+  }, []);
+
+  const handleModalAllow = async () => {
+    await AsyncStorage.setItem(CAMERA_PERM_KEY, "true");
+    setShowPermissionModal(false);
+    await requestPermissions(); // Aquí sí aparece el dialog nativo del sistema
+  };
+
+  const handleModalDismiss = async () => {
+    await AsyncStorage.setItem(CAMERA_PERM_KEY, "true");
+    setShowPermissionModal(false);
+    // permissions sigue null → !isPermissionGranted → CameraPermissionScreen
+  };
 
   const [capturedPhoto, setCapturedPhoto] = useState<PhotoResult | null>(null);
   const [capturedBase64, setCapturedBase64] = useState<string | undefined>(undefined);
@@ -124,7 +164,7 @@ export default function AddScreen() {
         commonName: result.commonName || "Planta desconocida",
         scientificName: result.scientificName || "",
         photoURL: null,
-        type: "unknown",
+        type: result.plantType || "other",
         groupId: "",
         isFavorite: false,
         notes: `Riego: ${result.watering}\nLuz: ${result.sunlight}\nSustrato: ${result.soil}`,
@@ -136,14 +176,27 @@ export default function AddScreen() {
         sunlight: result.sunlight,
         soil: result.soil,
         createdAt: new Date().toISOString(),
+        care: {
+          waterFreqDays:     result.care.wateringFrequencyDays,
+          lastWatered:       null,
+          fertilizeFreqDays: result.care.fertilizingFrequencyDays,
+          lastFertilized:    null,
+          pruneFreqDays:     result.care.pruningFrequencyDays,
+          lastPruned:        null,
+          lightType:         result.care.sunlight,
+          careNotes:         result.care.careNotes,
+        },
       },
       capturedPhoto.uri
     );
+    const unlocked = await checkAndUnlock(user?.id ?? 'user-1').catch(() => []);
+    for (const label of unlocked) showToast(label, 'success');
     setShowModal(false);
     setCapturedPhoto(null);
+    router.push('/(tabs)/explore');
   };
 
-  if (isLoadingPermissions) {
+  if (isCheckingPermissions || isLoadingPermissions) {
     return (
       <View style={[styles.centered, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -151,27 +204,27 @@ export default function AddScreen() {
     );
   }
 
+  if (showPermissionModal) {
+    return (
+      <View style={[styles.centered, { backgroundColor: theme.colors.background }]}>
+        <CameraPermissionModal
+          visible={showPermissionModal}
+          onAllow={handleModalAllow}
+          onDismiss={handleModalDismiss}
+        />
+      </View>
+    );
+  }
+
   if (!isPermissionGranted) {
     const permanentlyDenied =
       permissions?.camera.status === "denied" && !cameraCanAskAgain;
-
     return (
-      <View style={[styles.centered, { backgroundColor: theme.colors.background }]}>
-        <Feather name="camera-off" size={48} color={theme.colors.textSecondary} />
-        <Text style={[styles.permissionText, { color: theme.colors.textPrimary }]}>
-          {permanentlyDenied
-            ? "Permiso de cámara denegado permanentemente. Actívalo en Configuración."
-            : "Se necesita permiso de cámara y galería para escanear plantas."}
-        </Text>
-        <TouchableOpacity
-          style={[styles.permissionBtn, { backgroundColor: theme.colors.primary }]}
-          onPress={permanentlyDenied ? () => Linking.openSettings() : requestPermissions}
-        >
-          <Text style={styles.permissionBtnText}>
-            {permanentlyDenied ? "Abrir Configuración" : "Permitir Cámara"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <CameraPermissionScreen
+        permanentlyDenied={permanentlyDenied}
+        onAllow={requestPermissions}
+        onOpenSettings={() => Linking.openSettings()}
+      />
     );
   }
 
@@ -227,21 +280,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
-  },
-  permissionText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginHorizontal: 32,
-  },
-  permissionBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  permissionBtnText: {
-    color: "#fff",
-    fontWeight: "600",
   },
   cameraOverlay: {
     flex: 1,

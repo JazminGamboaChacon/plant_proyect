@@ -79,13 +79,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    if (user?.id) {
+      await Promise.all([
+        AsyncStorage.removeItem(`@bloomly_plants_${user.id}`),
+        AsyncStorage.removeItem(`@care_history_${user.id}`),
+      ]);
+    }
     setUser(null);
     setToken(null);
     await Promise.all([
       AsyncStorage.removeItem(AUTH_USER_KEY),
       AsyncStorage.removeItem(AUTH_TOKEN_KEY),
     ]);
-  }, []);
+  }, [user?.id]);
 
   return (
     <AuthContext.Provider

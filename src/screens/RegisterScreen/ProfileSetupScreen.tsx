@@ -44,6 +44,7 @@ export default function ProfileSetupScreen() {
   const [fullName, setFullName] = useState(data.fullName);
   const [username, setUsername] = useState(data.username || data.email.split("@")[0]);
   const [birthday, setBirthday] = useState(data.birthday);
+  const [bio, setBio] = useState(data.bio || "");
   const [photoBase64, setPhotoBase64] = useState(data.photoBase64);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(parseBirthday(data.birthday));
@@ -70,7 +71,7 @@ export default function ProfileSetupScreen() {
       setError("Ingresa un nombre de usuario");
       return;
     }
-    updateData({ fullName: fullName.trim(), username: username.trim(), birthday, photoBase64 });
+    updateData({ fullName: fullName.trim(), username: username.trim(), birthday, photoBase64, bio: bio.trim() });
     router.push("/preference");
   };
 
@@ -179,6 +180,39 @@ export default function ProfileSetupScreen() {
             </View>
 
             <View style={styles.fieldContainer}>
+              <Text style={styles.label}>Descripción (opcional)</Text>
+              <View style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                backgroundColor: theme.colors.background,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                borderRadius: theme.radius.md,
+                paddingHorizontal: theme.spacing.md,
+                paddingTop: 12,
+                paddingBottom: 12,
+                minHeight: 88,
+              }}>
+                <Feather name="align-left" size={18} color={theme.colors.textSecondary} style={{ marginRight: theme.spacing.sm, marginTop: 2 }} />
+                <TextInput
+                  style={{
+                    flex: 1,
+                    fontFamily: "Inter_400Regular",
+                    fontSize: theme.typography.sizes.md,
+                    color: theme.colors.textPrimary,
+                    textAlignVertical: "top",
+                  }}
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Cuéntanos sobre ti y tus plantas..."
+                  placeholderTextColor={theme.colors.textSecondary}
+                  multiline
+                  maxLength={300}
+                />
+              </View>
+            </View>
+
+            <View style={[styles.fieldContainer, { marginTop: theme.spacing.sm }]}>
               <Text style={styles.label}>Fecha de nacimiento</Text>
               <TouchableOpacity
                 style={styles.inputWrapper}

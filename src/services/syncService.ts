@@ -1,10 +1,10 @@
-import { createPlant } from './api';
+import { createPlant, patchPlantCare } from './api';
 import { getPendingPlants, markSynced, markSyncError } from './plantStorageService';
 
 export async function syncPendingPlants(
   userId: string
 ): Promise<{ synced: number; failed: number }> {
-  const pending = await getPendingPlants();
+  const pending = await getPendingPlants(userId);
   let synced = 0;
   let failed = 0;
 
@@ -20,10 +20,14 @@ export async function syncPendingPlants(
         isFavorite: plant.isFavorite,
         notes: plant.notes,
       });
-      await markSynced(plant.localId, apiPlant.id);
+      await markSynced(userId, plant.localId, apiPlant.id);
+      if (plant.care) {
+        try { await patchPlantCare(apiPlant.id, plant.care); } catch { /* silencioso */ }
+      }
       synced++;
     } catch (err) {
       await markSyncError(
+        userId,
         plant.localId,
         err instanceof Error ? err.message : 'Error de sincronización'
       );
