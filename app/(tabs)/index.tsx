@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -296,6 +296,29 @@ function PlantGrid({
   );
 }
 
+// ── Sección 6: Doctor de Plantas ─────────────────────────────────────────────
+function DoctorCard() {
+  return (
+    <TouchableOpacity onPress={() => router.push("/doctor" as any)} activeOpacity={0.82}>
+      <LinearGradient
+        colors={["#FFF3E0", "#FFE8CC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.doctorCard}
+      >
+        <View style={styles.doctorIconBox}>
+          <MaterialCommunityIcons name="stethoscope" size={28} color="#E65100" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.doctorTitle}>Doctor de Plantas</Text>
+          <Text style={styles.doctorSubtitle}>Diagnostica enfermedades y plagas</Text>
+        </View>
+        <Feather name="chevron-right" size={20} color="#8A9A8A" />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+}
+
 // ── Pantalla principal ────────────────────────────────────────────────────────
 const SHAKE_THRESHOLD = 1.8;
 const COOLDOWN_MS = 2000;
@@ -380,6 +403,10 @@ export default function HomeScreen() {
 
         <Animated.View entering={FadeInDown.delay(320).duration(400)}>
           <PlantGrid plants={plants} />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+          <DoctorCard />
         </Animated.View>
       </ScrollView>
 
@@ -665,6 +692,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     fontWeight: "500",
+  },
+
+  // Doctor card
+  doctorCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#FFB74D",
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    elevation: 2,
+    shadowColor: "#E65100",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  doctorIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#FFF8E1",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  doctorTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1A2A1A",
+  },
+  doctorSubtitle: {
+    fontSize: 12,
+    color: "#8A9A8A",
+    marginTop: 3,
   },
 
   // Shake modal
