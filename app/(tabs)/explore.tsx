@@ -103,13 +103,15 @@ function DiagnosisDetailModal({
   diagnosis: LocalDiagnosis | null;
   onClose: () => void;
 }) {
+  const { theme } = useTheme();
+  const t = theme.colors;
   if (!diagnosis) return null;
   const date = new Date(diagnosis.createdAt).toLocaleDateString("es-CR", {
     day: "numeric", month: "short", year: "numeric",
   });
   return (
     <Modal visible={!!diagnosis} animationType="slide" transparent={false}>
-      <SafeAreaView style={detailStyles.safe}>
+      <SafeAreaView style={[detailStyles.safe, { backgroundColor: t.surface }]}>
         <ScrollView contentContainerStyle={detailStyles.scroll} showsVerticalScrollIndicator={false}>
           {diagnosis.photoUri ? (
             <Image source={{ uri: diagnosis.photoUri }} style={detailStyles.photo} resizeMode="cover" />
@@ -118,48 +120,48 @@ function DiagnosisDetailModal({
           {diagnosis.isHealthy ? (
             <View style={detailStyles.body}>
               <View style={detailStyles.centerIcon}>
-                <Feather name="check-circle" size={48} color="#16A34A" />
+                <Feather name="check-circle" size={48} color={t.primary} />
               </View>
               <Text style={detailStyles.healthyTitle}>¡Tu planta está sana!</Text>
-              <Text style={detailStyles.healthySubtitle}>
+              <Text style={[detailStyles.healthySubtitle, { color: t.textSecondary }]}>
                 No se detectaron enfermedades ni plagas visibles.
               </Text>
-              <Text style={detailStyles.dateText}>{date}</Text>
+              <Text style={[detailStyles.dateText, { color: t.textSecondary }]}>{date}</Text>
             </View>
           ) : (
             <View style={detailStyles.body}>
               <View style={detailStyles.problemHeader}>
-                <Text style={detailStyles.problemName}>{diagnosis.name}</Text>
+                <Text style={[detailStyles.problemName, { color: t.textPrimary }]}>{diagnosis.name}</Text>
                 <View style={[detailStyles.severityBadge, { backgroundColor: SEVERITY_COLOR[diagnosis.severity] ?? "#888" }]}>
                   <Text style={detailStyles.severityText}>{diagnosis.severity}</Text>
                 </View>
               </View>
 
               <View style={detailStyles.metaRow}>
-                <View style={detailStyles.typePill}>
-                  <Text style={detailStyles.typePillText}>{TYPE_LABEL[diagnosis.type] ?? diagnosis.type}</Text>
+                <View style={[detailStyles.typePill, { backgroundColor: t.primarySoft }]}>
+                  <Text style={[detailStyles.typePillText, { color: t.textSecondary }]}>{TYPE_LABEL[diagnosis.type] ?? diagnosis.type}</Text>
                 </View>
-                <Text style={detailStyles.confidenceText}>{diagnosis.confidence}% confianza</Text>
-                <Text style={detailStyles.dateText}>{date}</Text>
+                <Text style={[detailStyles.confidenceText, { color: t.textSecondary }]}>{diagnosis.confidence}% confianza</Text>
+                <Text style={[detailStyles.dateText, { color: t.textSecondary }]}>{date}</Text>
               </View>
 
               {diagnosis.affectedArea ? (
-                <View style={detailStyles.infoBlock}>
-                  <Text style={detailStyles.infoLabel}>Zona afectada</Text>
-                  <Text style={detailStyles.infoText}>{diagnosis.affectedArea}</Text>
+                <View style={[detailStyles.infoBlock, { backgroundColor: t.primarySoft }]}>
+                  <Text style={[detailStyles.infoLabel, { color: t.textSecondary }]}>Zona afectada</Text>
+                  <Text style={[detailStyles.infoText, { color: t.textPrimary }]}>{diagnosis.affectedArea}</Text>
                 </View>
               ) : null}
 
-              <View style={detailStyles.infoBlock}>
-                <Text style={detailStyles.infoLabel}>Descripción</Text>
-                <Text style={detailStyles.infoText}>{diagnosis.description}</Text>
+              <View style={[detailStyles.infoBlock, { backgroundColor: t.primarySoft }]}>
+                <Text style={[detailStyles.infoLabel, { color: t.textSecondary }]}>Descripción</Text>
+                <Text style={[detailStyles.infoText, { color: t.textPrimary }]}>{diagnosis.description}</Text>
               </View>
 
-              <View style={[detailStyles.infoBlock, detailStyles.treatmentBlock]}>
-                <Feather name="activity" size={14} color="#16A34A" />
+              <View style={[detailStyles.infoBlock, detailStyles.treatmentBlock, { backgroundColor: t.primaryPale, borderColor: t.primaryLight }]}>
+                <Feather name="activity" size={14} color={t.primary} />
                 <View style={{ flex: 1 }}>
-                  <Text style={detailStyles.infoLabel}>Tratamiento</Text>
-                  <Text style={detailStyles.infoText}>{diagnosis.treatment}</Text>
+                  <Text style={[detailStyles.infoLabel, { color: t.textSecondary }]}>Tratamiento</Text>
+                  <Text style={[detailStyles.infoText, { color: t.textPrimary }]}>{diagnosis.treatment}</Text>
                 </View>
               </View>
 
@@ -167,8 +169,8 @@ function DiagnosisDetailModal({
                 <View style={[detailStyles.infoBlock, detailStyles.productBlock]}>
                   <Feather name="shopping-bag" size={14} color="#7C3AED" />
                   <View style={{ flex: 1 }}>
-                    <Text style={detailStyles.infoLabel}>Producto recomendado</Text>
-                    <Text style={detailStyles.infoText}>{diagnosis.product}</Text>
+                    <Text style={[detailStyles.infoLabel, { color: t.textSecondary }]}>Producto recomendado</Text>
+                    <Text style={[detailStyles.infoText, { color: t.textPrimary }]}>{diagnosis.product}</Text>
                   </View>
                 </View>
               ) : null}
@@ -176,8 +178,8 @@ function DiagnosisDetailModal({
           )}
         </ScrollView>
 
-        <View style={detailStyles.actions}>
-          <TouchableOpacity onPress={onClose} style={detailStyles.closeBtn}>
+        <View style={[detailStyles.actions, { borderTopColor: t.border }]}>
+          <TouchableOpacity onPress={onClose} style={[detailStyles.closeBtn, { backgroundColor: t.primary }]}>
             <Text style={detailStyles.closeBtnText}>Cerrar</Text>
           </TouchableOpacity>
         </View>
