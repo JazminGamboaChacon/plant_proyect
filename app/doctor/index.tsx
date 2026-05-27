@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { CameraView } from 'expo-camera';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack } from 'expo-router';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
@@ -43,6 +44,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default function DoctorScreen() {
   const { theme } = useTheme();
+  const t = theme.colors;
   const { user } = useAuth();
   const {
     cameraRef,
@@ -209,7 +211,7 @@ export default function DoctorScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       {/* Diagnosis modal */}
       <Modal visible={showModal} animationType="slide" transparent={false}>
-        <SafeAreaView style={styles.modalSafe}>
+        <SafeAreaView style={[styles.modalSafe, { backgroundColor: t.surface }]}>
           <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
 
             {/* Photo preview */}
@@ -220,15 +222,15 @@ export default function DoctorScreen() {
             {/* Loading */}
             {isDiagnosing && (
               <View style={styles.modalLoading}>
-                <ActivityIndicator size="large" color="#E65100" />
-                <Text style={styles.loadingText}>Analizando la planta…</Text>
+                <ActivityIndicator size="large" color={t.primary} />
+                <Text style={[styles.loadingText, { color: t.textSecondary }]}>Analizando la planta…</Text>
               </View>
             )}
 
             {/* Error */}
             {!isDiagnosing && diagnosisError && (
               <View style={styles.modalBody}>
-                <Feather name="alert-circle" size={36} color="#DC2626" />
+                <Feather name="alert-circle" size={36} color={t.error ?? '#DC2626'} />
                 <Text style={styles.errorText}>{diagnosisError}</Text>
               </View>
             )}
@@ -237,10 +239,10 @@ export default function DoctorScreen() {
             {!isDiagnosing && diagnosisResult?.isHealthy && (
               <View style={styles.modalBody}>
                 <View style={styles.healthyIcon}>
-                  <Feather name="check-circle" size={48} color="#16A34A" />
+                  <Feather name="check-circle" size={48} color={t.primary} />
                 </View>
                 <Text style={styles.healthyTitle}>¡Tu planta está sana!</Text>
-                <Text style={styles.healthySubtitle}>
+                <Text style={[styles.healthySubtitle, { color: t.textSecondary }]}>
                   No se detectaron enfermedades ni plagas visibles.
                 </Text>
               </View>
@@ -251,7 +253,7 @@ export default function DoctorScreen() {
               <View style={styles.modalBody}>
                 {/* Header row */}
                 <View style={styles.problemHeader}>
-                  <Text style={styles.problemName}>{diagnosisResult.name}</Text>
+                  <Text style={[styles.problemName, { color: t.textPrimary }]}>{diagnosisResult.name}</Text>
                   <View style={[styles.severityBadge, { backgroundColor: SEVERITY_COLOR[diagnosisResult.severity] ?? '#888' }]}>
                     <Text style={styles.severityText}>{diagnosisResult.severity}</Text>
                   </View>
@@ -259,32 +261,32 @@ export default function DoctorScreen() {
 
                 {/* Type + confidence */}
                 <View style={styles.metaRow}>
-                  <View style={styles.typePill}>
-                    <Text style={styles.typePillText}>{TYPE_LABEL[diagnosisResult.type] ?? diagnosisResult.type}</Text>
+                  <View style={[styles.typePill, { backgroundColor: t.primarySoft }]}>
+                    <Text style={[styles.typePillText, { color: t.textSecondary }]}>{TYPE_LABEL[diagnosisResult.type] ?? diagnosisResult.type}</Text>
                   </View>
-                  <Text style={styles.confidenceText}>{diagnosisResult.confidence}% confianza</Text>
+                  <Text style={[styles.confidenceText, { color: t.textSecondary }]}>{diagnosisResult.confidence}% confianza</Text>
                 </View>
 
                 {/* Affected area */}
                 {diagnosisResult.affectedArea ? (
-                  <View style={styles.infoBlock}>
-                    <Text style={styles.infoLabel}>Zona afectada</Text>
-                    <Text style={styles.infoText}>{diagnosisResult.affectedArea}</Text>
+                  <View style={[styles.infoBlock, { backgroundColor: t.primarySoft }]}>
+                    <Text style={[styles.infoLabel, { color: t.textSecondary }]}>Zona afectada</Text>
+                    <Text style={[styles.infoText, { color: t.textPrimary }]}>{diagnosisResult.affectedArea}</Text>
                   </View>
                 ) : null}
 
                 {/* Description */}
-                <View style={styles.infoBlock}>
-                  <Text style={styles.infoLabel}>Descripción</Text>
-                  <Text style={styles.infoText}>{diagnosisResult.description}</Text>
+                <View style={[styles.infoBlock, { backgroundColor: t.primarySoft }]}>
+                  <Text style={[styles.infoLabel, { color: t.textSecondary }]}>Descripción</Text>
+                  <Text style={[styles.infoText, { color: t.textPrimary }]}>{diagnosisResult.description}</Text>
                 </View>
 
                 {/* Treatment */}
-                <View style={[styles.infoBlock, styles.treatmentBlock]}>
-                  <Feather name="activity" size={14} color="#16A34A" />
+                <View style={[styles.infoBlock, styles.treatmentBlock, { backgroundColor: t.primaryPale, borderColor: t.primaryLight }]}>
+                  <Feather name="activity" size={14} color={t.primary} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.infoLabel}>Tratamiento</Text>
-                    <Text style={styles.infoText}>{diagnosisResult.treatment}</Text>
+                    <Text style={[styles.infoLabel, { color: t.textSecondary }]}>Tratamiento</Text>
+                    <Text style={[styles.infoText, { color: t.textPrimary }]}>{diagnosisResult.treatment}</Text>
                   </View>
                 </View>
 
@@ -293,8 +295,8 @@ export default function DoctorScreen() {
                   <View style={[styles.infoBlock, styles.productBlock]}>
                     <Feather name="shopping-bag" size={14} color="#7C3AED" />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.infoLabel}>Producto recomendado</Text>
-                      <Text style={styles.infoText}>{diagnosisResult.product}</Text>
+                      <Text style={[styles.infoLabel, { color: t.textSecondary }]}>Producto recomendado</Text>
+                      <Text style={[styles.infoText, { color: t.textPrimary }]}>{diagnosisResult.product}</Text>
                     </View>
                   </View>
                 ) : null}
@@ -303,9 +305,9 @@ export default function DoctorScreen() {
           </ScrollView>
 
           {/* Action buttons */}
-          <View style={styles.modalActions}>
-            <TouchableOpacity onPress={handleRetake} style={styles.retakeBtn}>
-              <Text style={styles.retakeBtnText}>Retomar</Text>
+          <View style={[styles.modalActions, { borderTopColor: t.border }]}>
+            <TouchableOpacity onPress={handleRetake} style={[styles.retakeBtn, { borderColor: t.border }]}>
+              <Text style={[styles.retakeBtnText, { color: t.textSecondary }]}>Retomar</Text>
             </TouchableOpacity>
 
             {diagnosisResult && !isDiagnosing && (
@@ -314,13 +316,20 @@ export default function DoctorScreen() {
                 style={styles.saveBtn}
                 disabled={isSaving}
               >
-                {isSaving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Text style={styles.saveBtnText}>
-                    {diagnosisResult.isHealthy ? 'Cerrar' : 'Guardar diagnóstico'}
-                  </Text>
-                )}
+                <LinearGradient
+                  colors={['#2D7A4F', '#4CAF50']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.saveBtnGrad}
+                >
+                  {isSaving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.saveBtnText}>
+                      {diagnosisResult.isHealthy ? 'Cerrar' : 'Guardar diagnóstico'}
+                    </Text>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </View>
@@ -478,10 +487,13 @@ const styles = StyleSheet.create({
   retakeBtnText: { fontSize: 14, fontWeight: '600', color: '#555' },
   saveBtn: {
     flex: 2,
-    paddingVertical: 13,
     borderRadius: 12,
-    backgroundColor: '#E65100',
+    overflow: 'hidden',
+  },
+  saveBtnGrad: {
+    paddingVertical: 13,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   saveBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 });
